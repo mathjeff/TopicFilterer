@@ -17,7 +17,7 @@ namespace TopicFilterer
             ContentView content = new ContentView();
             this.Content = content;
 
-            ViewManager viewManager = new ViewManager(content, new TextblockLayout("Sample text"));
+            TopicFilterer topicFilterer = new TopicFilterer(content);
         }
     }
 }
