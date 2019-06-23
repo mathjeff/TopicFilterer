@@ -1,0 +1,24 @@
+
+<Project>  
+  <name>ActivityRecommender</name>
+  <source><GitRepo/></source>
+  <version><GitVersion/></version>
+  <dependencies>  
+    <DependencyList>  
+      <item>  
+        <name>VisiPlacer</name>
+        <version>e8115d081cd616781c047bd958f0163767efba94</version>
+        <syncher>  
+          <Git>  
+            <origin>  
+              <Url>  
+                <server>https://github.com</server>
+                <path>mathjeff/VisiPlacer</path>
+              </Url>
+            </origin>
+          </Git>
+        </syncher>
+      </item>
+    </DependencyList>
+  </dependencies>
+</Project>
