@@ -1,6 +1,6 @@
 
 <Project>  
-  <name>ActivityRecommender</name>
+  <name>TopicFilterer</name>
   <source><GitRepo/></source>
   <version><GitVersion/></version>
   <dependencies>  
