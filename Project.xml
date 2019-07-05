@@ -7,7 +7,7 @@
     <DependencyList>  
       <item>  
         <name>VisiPlacer</name>
-        <version>df0e8758e1d47cfe7f55ba55fe3dcd14893e2a1f</version>
+        <version>ca01fa65f8fabdead1cc7d4daca9e402c0953e2f</version>
         <syncher>  
           <Git>  
             <origin>  
