@@ -17,7 +17,15 @@ namespace TopicFilterer
             ContentView content = new ContentView();
             this.Content = content;
 
-            TopicFilterer topicFilterer = new TopicFilterer(content);
+            this.topicFilterer = new TopicFilterer(content);
         }
+
+
+        protected override bool OnBackButtonPressed()
+        {
+            return this.topicFilterer.GoBack();
+        }
+
+        private TopicFilterer topicFilterer;
     }
 }
