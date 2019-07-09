@@ -105,27 +105,53 @@ namespace TopicFilterer
                 score -= 1;
             if (lowerTitle.StartsWith("aita "))
                 score -= 2;
-            if (lowerTitle.Contains(" dog "))
+            if (lowerTitle.Contains(" dog ") || lowerTitle.StartsWith("dog "))
                 score -= 2;
+            if (lowerTitle.Contains("espn ") || lowerTitle.Contains(" espn"))
+                score -= 2;
+            if (lowerTitle.Contains("nba"))
+                score -= 2;
+            if (lowerTitle.Contains("not fair") || lowerTitle.Contains("unfair"))
+                score -= 1;
             if (lowerTitle.StartsWith("ea "))
                 score -= 1;
             if (lowerTitle.EndsWith(".."))
                 score -= 1;
-            if (lowerTitle.Contains("MacBook"))
+            if (lowerTitle.Contains("macbook"))
                 score -= 2;
             if (lowerTitle.Contains("apple"))
                 score -= 2;
-            if (lowerTitle.Contains(" died"))
+            if (lowerTitle.Contains("steve jobs"))
+                score -= 2;
+            if (lowerTitle.Contains("stranger things"))
+                score -= 2;
+            if (lowerTitle.Contains(" died") || lowerTitle.Contains(" dead") || lowerTitle.Contains(" dies"))
+                score -= 1;
+            if (lowerTitle.Contains(" war "))
+                score -= 1;
+            if (lowerTitle.Contains(" injured") || lowerTitle.Contains(" injury") || lowerTitle.Contains("surgery") || lowerTitle.Contains("unsafe") || lowerTitle.Contains("police") || lowerTitle.Contains("arrested"))
                 score -= 1;
             if (lowerTitle.Contains(" boo "))
                 score -= 1;
 
+            if (lowerTitle.Contains("nasa ") || lowerTitle.Contains("space ") || lowerTitle.Contains("hubble ") || lowerTitle.Contains(" moon"))
+                score += 2;
+            if (lowerTitle.Contains("research"))
+                score += 2;
+            if (lowerTitle.Contains("better"))
+                score += 2;
+            if (lowerTitle.Contains("bank "))
+                score += 2;
             if (lowerTitle.StartsWith("til ") || lowerTitle.Contains("learn"))
                 score += 2;
             if (lowerTitle.Contains("psychology") || lowerTitle.Contains("math"))
                 score += 2;
             if (lowerTitle.Contains("strategy"))
                 score += 2;
+            if (lowerTitle.Contains("drone"))
+                score += 1;
+            if (lowerTitle.Contains("npr ") || lowerTitle.Contains(" npr"))
+                score += 1;
             if (lowerTitle.Contains("exciting"))
                 score += 1;
             if (lowerTitle.Contains("smart"))
