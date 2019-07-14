@@ -70,7 +70,7 @@ namespace TopicFilterer
             posts = this.rankPosts(posts);
             foreach (Post post in posts)
             {
-                gridBuilder.AddLayout(new PostView(post, this.LayoutStack));
+                gridBuilder.AddLayout(new PostView(post));
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());

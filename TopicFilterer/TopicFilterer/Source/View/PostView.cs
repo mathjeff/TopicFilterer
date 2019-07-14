@@ -8,9 +8,9 @@ namespace TopicFilterer.View
 {
     class PostView : ContainerLayout
     {
-        public PostView(Post post, LayoutStack layoutStack)
+        public PostView(Post post)
         {
-            this.layoutStack = layoutStack;
+            this.post = post;
             Button button = new Button();
             ButtonLayout buttonLayout = new ButtonLayout(button, post.Title);
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
@@ -26,9 +26,9 @@ namespace TopicFilterer.View
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            this.layoutStack.AddLayout(this.detailsLayout);
+            Device.OpenUri(new Uri(this.post.Source));
         }
-        LayoutStack layoutStack;
         LayoutChoice_Set detailsLayout;
+        Post post;
     }
 }
