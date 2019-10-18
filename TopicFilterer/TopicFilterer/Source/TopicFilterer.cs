@@ -147,8 +147,11 @@ namespace TopicFilterer
                 score -= 1;
             if (lowerTitle.Contains(" boo "))
                 score -= 1;
+            if (lowerTitle.Split(' ').Length <= 6)
+                score -= 1;
 
-            if (lowerTitle.Contains("nasa ") || lowerTitle.Contains("space ") || lowerTitle.Contains("hubble ") || lowerTitle.Contains(" moon"))
+            if (lowerTitle.Contains("nasa ") || lowerTitle.Contains("space ") || lowerTitle.Contains("hubble ") ||
+                (lowerTitle.Contains(" moon") && !lowerTitle.Contains("m over the moon")))
                 score += 2;
             if (lowerTitle.Contains("research"))
                 score += 2;
