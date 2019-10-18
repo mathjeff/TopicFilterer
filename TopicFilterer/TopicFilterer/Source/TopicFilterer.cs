@@ -192,7 +192,10 @@ namespace TopicFilterer
         {
             WebClient webClient = new WebClient();
             List<String> texts = new List<String>();
-            foreach (string urlText in new List<String> { "https://www.reddit.com/.rss", "https://news.google.com/rss" })
+            List<String> urls = new List<String>() { "https://www.reddit.com/.rss",
+                "https://news.google.com/rss",
+                "http://connect.biorxiv.org/biorxiv_xml.php?subject=all" };
+            foreach (string urlText in urls)
             {
                 byte[] data = webClient.DownloadData(urlText);
                 string text = System.Text.Encoding.UTF8.GetString(data);

@@ -29,6 +29,7 @@ namespace TopicFilterer
                                 nodeStack.Add(newNode);
                             break;
                         case XmlNodeType.Text:
+                        case XmlNodeType.CDATA:
                             // found a new element that doesn't have any more nodes inside it
                             newNode = new XmlNode();
                             newNode.Name = reader.Name;
