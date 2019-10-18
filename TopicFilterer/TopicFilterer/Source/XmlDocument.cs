@@ -15,7 +15,7 @@ namespace TopicFilterer
             nodeStack.Add(newNode);
             try
             {
-                while (reader.Read())
+                while (reader.MoveToNextAttribute() || reader.Read())
                 {
                     switch (reader.NodeType)
                     {
@@ -38,6 +38,12 @@ namespace TopicFilterer
                         case XmlNodeType.EndElement:
                             // found the end of a previous element
                             nodeStack.RemoveAt(nodeStack.Count - 1);
+                            break;
+                        case XmlNodeType.Attribute:
+                            XmlNode attribute = new XmlNode();
+                            attribute.Name = reader.Name;
+                            attribute.Value = reader.Value;
+                            newNode.Attributes.Add(attribute);
                             break;
                         case XmlNodeType.Whitespace:
                             break;
@@ -62,9 +68,20 @@ namespace TopicFilterer
         public XmlNode()
         {
             this.ChildNodes = new List<XmlNode>();
+            this.Attributes = new List<XmlNode>();
         }
 
+        public String getAttribute(String key)
+        {
+            foreach (XmlNode attribute in this.Attributes)
+            {
+                if (attribute.Name == key)
+                    return attribute.Value;
+            }
+            return null;
+        }
         public List<XmlNode> ChildNodes { get; set; }
+        public List<XmlNode> Attributes { get; set; }
         public String Name { get; set; }
         public String Value { get; set; }
         public XmlNode FirstChild

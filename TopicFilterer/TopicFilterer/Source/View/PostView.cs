@@ -26,7 +26,11 @@ namespace TopicFilterer.View
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            Device.OpenUri(new Uri(this.post.Source));
+            string source = this.post.Source;
+            if (source != null && null != "")
+            {
+                Device.OpenUri(new Uri(this.post.Source));
+            }
         }
         LayoutChoice_Set detailsLayout;
         Post post;
