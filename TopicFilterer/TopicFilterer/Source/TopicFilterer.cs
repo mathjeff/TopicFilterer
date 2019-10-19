@@ -82,6 +82,9 @@ namespace TopicFilterer
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
 
             List<ScoredPost> scored = this.rankPosts(posts);
+            int maxCountToShow = 50;
+            if (scored.Count > maxCountToShow)
+                scored = scored.GetRange(0, maxCountToShow);
             double previousScore = double.NegativeInfinity;
             foreach (ScoredPost scoredPost in scored)
             {
