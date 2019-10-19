@@ -81,17 +81,28 @@ namespace TopicFilterer
         {
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
 
-            posts = this.rankPosts(posts);
-            foreach (Post post in posts)
+            List<ScoredPost> scored = this.rankPosts(posts);
+            double previousScore = double.NegativeInfinity;
+            foreach (ScoredPost scoredPost in scored)
             {
-                gridBuilder.AddLayout(new PostView(post));
+                double thisScore = scoredPost.Score;
+                if (thisScore != previousScore)
+                {
+                    Label label = new Label();
+                    label.Text = "Score: " + thisScore;
+                    gridBuilder.AddLayout(new TextblockLayout(label));
+                    label.BackgroundColor = Color.Black;
+                    label.TextColor = Color.White;
+                    previousScore = thisScore;
+                }
+                gridBuilder.AddLayout(new PostView(scoredPost.Post));
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
             this.LayoutStack.AddLayout(scrollLayout);
         }
 
-        private List<Post> rankPosts(List<Post> posts)
+        private List<ScoredPost> rankPosts(List<Post> posts)
         {
             List<ScoredPost> scoredPosts = new List<ScoredPost>();
             foreach (Post post in posts)
@@ -100,10 +111,10 @@ namespace TopicFilterer
             }
             scoredPosts.Sort(new ScoredPost_Sorter());
             scoredPosts.Reverse();
-            List<Post> results = new List<Post>();
+            List<ScoredPost> results = new List<ScoredPost>();
             foreach (ScoredPost scored in scoredPosts)
             {
-                results.Add(scored.Post);
+                results.Add(scored);
             }
             return results;
         }
