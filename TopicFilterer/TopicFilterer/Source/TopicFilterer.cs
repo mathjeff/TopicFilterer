@@ -125,6 +125,11 @@ namespace TopicFilterer
         {
             double score = 0;
             string lowerTitle = post.Title.ToLower();
+            char[] wordSeparators = new char[] { ' ', ',', '.', '!', '?', '-' };
+            List<String> orderedWords = new List<string>(lowerTitle.Split(wordSeparators));
+            HashSet<String> unorderedWords = new HashSet<string>(orderedWords);
+
+            // generic negative filters
             if (lowerTitle.StartsWith("when") && !lowerTitle.Contains("?"))
                 score -= 2;
             if (lowerTitle.Contains("rescued"))
@@ -164,6 +169,7 @@ namespace TopicFilterer
             if (lowerTitle.Split(' ').Length <= 6)
                 score -= 1;
 
+            // generic positive filters
             if (lowerTitle.Contains("nasa ") || lowerTitle.Contains("space ") || lowerTitle.Contains("hubble ") ||
                 (lowerTitle.Contains(" moon") && !lowerTitle.Contains("m over the moon")))
                 score += 2;
@@ -187,6 +193,123 @@ namespace TopicFilterer
                 score += 1;
             if (lowerTitle.Contains("smart"))
                 score += 1;
+
+            // Microbiome filters
+            if (
+                unorderedWords.Contains("microbiome")
+                || unorderedWords.Contains("microbiota")
+                || unorderedWords.Contains("microbial")
+                || unorderedWords.Contains("microbe")
+                || unorderedWords.Contains("bacterial")
+                )
+            {
+                if (lowerTitle.Contains("commensal"))
+                    score += 3;
+                if (lowerTitle.Contains("pathogen"))
+                    score += 2;
+                if (lowerTitle.Contains("antimicrobial resistance"))
+                    score += 2;
+                if (lowerTitle.Contains("antibiotic resistance"))
+                    score += 2;
+                if (unorderedWords.Contains("ahr"))
+                    score += 2;
+                if (unorderedWords.Contains("lactobacillus"))
+                    score += 1.5;
+                if (lowerTitle.Contains("horizontal gene transfer"))
+                    score += 2;
+                if (unorderedWords.Contains("immune"))
+                    score += 2;
+                if (unorderedWords.Contains("depression"))
+                    score += 2;
+                if (unorderedWords.Contains("ibd"))
+                    score += 2;
+                if (unorderedWords.Contains("butyrate"))
+                    score += 2;
+                if (unorderedWords.Contains("evolution"))
+                    score += 2.5;
+                if (unorderedWords.Contains("adaptation"))
+                    score += 2.5;
+                if (unorderedWords.Contains("interaction"))
+                    score += 3;
+                if (unorderedWords.Contains("virus"))
+                    score += 2;
+                if (unorderedWords.Contains("phage"))
+                    score += 2;
+                if (lowerTitle.Contains("population genetics"))
+                    score += 1.5;
+                if (unorderedWords.Contains("virome"))
+                    score += 1.5;
+                if (unorderedWords.Contains("bioinformatics"))
+                    score += 2;
+                if (unorderedWords.Contains("sfb"))
+                    score += 1;
+                if (lowerTitle.Contains("segmented filamentous bacteria"))
+                    score += 1;
+                if (lowerTitle.Contains("single cell"))
+                    score += 2;
+                if (unorderedWords.Contains("nanopore"))
+                    score += 2;
+                if (unorderedWords.Contains("bgc"))
+                    score += 1;
+                if (lowerTitle.Contains("biosynthetic gene cluster"))
+                    score += 1;
+                if (unorderedWords.Contains("cfv"))
+                    score += 1;
+                if (lowerTitle.Contains("vitamin"))
+                    score += 1;
+                if (unorderedWords.Contains("geba"))
+                    score += 1;
+                if (unorderedWords.Contains("pks"))
+                    score += 1;
+                if (unorderedWords.Contains("rps"))
+                    score += 1;
+                if (unorderedWords.Contains("eps"))
+                    score += 1;
+                if (unorderedWords.Contains("fmt"))
+                    score += 1;
+                if (unorderedWords.Contains("longitudinal"))
+                    score += 1;
+                if (unorderedWords.Contains("host"))
+                    score += 2;
+                if (lowerTitle.Contains("isolate"))
+                    score += 2;
+                if (unorderedWords.Contains("aryl"))
+                    score += 1.5;
+                if (lowerTitle.Contains("indole"))
+                    score += 1;
+                if (unorderedWords.Contains("tool"))
+                    score += 2;
+                if (unorderedWords.Contains("method"))
+                    score += 2;
+                if (lowerTitle.Contains("plasmid"))
+                    score += 1;
+                if (unorderedWords.Contains("stool"))
+                    score += 2;
+                if (lowerTitle.Contains("gut"))
+                    score += 2;
+                if (lowerTitle.Contains("mobile"))
+                    score += 2;
+                if (lowerTitle.Contains("human"))
+                    score += 3;
+                if (lowerTitle.Contains("virulence"))
+                    score += 2;
+                if (lowerTitle.Contains("diabet"))
+                    score += 1;
+                if (lowerTitle.Contains("infection"))
+                    score += 1;
+                if (lowerTitle.Contains("genomic"))
+                    score += 1.5;
+                if (lowerTitle.Contains("disease"))
+                    score += 2;
+                if (lowerTitle.Contains("regulatory"))
+                    score += 1;
+                if (lowerTitle.Contains("genotyp"))
+                    score += 1;
+                if (lowerTitle.Contains("phenotyp"))
+                    score += 1;
+                if (lowerTitle.Contains("single-cell"))
+                    score += 2;
+            }
             return score;
         }
 
