@@ -347,10 +347,17 @@ namespace TopicFilterer
             };
             foreach (string urlText in urls)
             {
-                byte[] data = webClient.DownloadData(urlText);
-                string text = System.Text.Encoding.UTF8.GetString(data);
-                System.Diagnostics.Debug.Write("downloaded data of " + text);
-                texts.Add(text);
+                try
+                {
+                    byte[] data = webClient.DownloadData(urlText);
+                    string text = System.Text.Encoding.UTF8.GetString(data);
+                    System.Diagnostics.Debug.Write("From " + urlText + ", downloaded data of " + text);
+                    texts.Add(text);
+                }
+                catch (WebException e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Failed to open " + urlText + ", " + e);
+                }
             }
             return texts;
         }
