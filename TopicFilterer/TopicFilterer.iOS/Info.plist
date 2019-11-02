@@ -25,7 +25,7 @@
     <key>CFBundleDisplayName</key>
     <string>TopicFilterer</string>
     <key>CFBundleIdentifier</key>
-    <string>com.companyname.TopicFilterer</string>
+    <string>com.mathjeff.TopicFilterer</string>
     <key>CFBundleVersion</key>
     <string>1.0</string>
     <key>UILaunchStoryboardName</key>
