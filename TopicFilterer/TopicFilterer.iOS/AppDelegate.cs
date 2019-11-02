@@ -23,6 +23,10 @@ namespace TopicFilterer.iOS
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
             global::Xamarin.Forms.Forms.Init();
+            Uniforms.Misc.iOS.ScreenUtils.Init();
+            Uniforms.Misc.iOS.ImageUtils.Init();
+            Uniforms.Misc.iOS.KeyboardUtils.Init();
+            Uniforms.Misc.iOS.TextUtils.Init();
             LoadApplication(new App());
 
             return base.FinishedLaunching(app, options);
