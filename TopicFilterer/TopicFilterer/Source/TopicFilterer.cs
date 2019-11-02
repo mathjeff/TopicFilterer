@@ -98,7 +98,9 @@ namespace TopicFilterer
                     label.TextColor = Color.White;
                     previousScore = thisScore;
                 }
-                gridBuilder.AddLayout(new PostView(scoredPost.Post));
+                Post post = scoredPost.Post;
+                if (post.Source != null && post.Source != "" && post.Text != null && post.Text != "")
+                    gridBuilder.AddLayout(new PostView(post));
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());

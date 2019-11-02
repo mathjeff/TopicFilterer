@@ -12,16 +12,23 @@ namespace TopicFilterer.View
         {
             this.post = post;
             Button button = new Button();
-            ButtonLayout buttonLayout = new ButtonLayout(button, post.Title);
+            ButtonLayout buttonLayout = new ButtonLayout(button, "Open");
+
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
-            builder.AddLayout(new TextblockLayout(post.Text, 20));
-            if (post.Source != null && post.Source != "")
-                builder.AddLayout(new TextblockLayout(post.Text, 20));
-            this.detailsLayout = ScrollLayout.New(builder.BuildAnyLayout());
+            LayoutChoice_Set titleLayout = new TextblockLayout(post.Title);
+            /*if (post.Text.Length > 20)
+            {
+                TextblockLayout summaryLayout;
+                summaryLayout = new TextblockLayout(post.Title.Substring(0, 17) + "...");
+                titleLayout = new LayoutUnion(summaryLayout, titleLayout);
+            }*/
+
+            builder.AddLayout(titleLayout);
+            builder.AddLayout(new ButtonLayout(button));
 
             button.Clicked += Button_Clicked;
 
-            this.SubLayout = buttonLayout;
+            this.SubLayout = builder.BuildAnyLayout();
         }
 
         private void Button_Clicked(object sender, EventArgs e)
@@ -32,7 +39,6 @@ namespace TopicFilterer.View
                 Device.OpenUri(new Uri(this.post.Source));
             }
         }
-        LayoutChoice_Set detailsLayout;
         Post post;
     }
 }
