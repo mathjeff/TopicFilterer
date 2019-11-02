@@ -15,11 +15,15 @@ namespace TopicFilterer.View
             ButtonLayout buttonLayout = new ButtonLayout(button, "Open");
 
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
-            LayoutChoice_Set titleLayout = new TextblockLayout(post.Title);
-            /*if (post.Text.Length > 20)
+            Label label = new Label();
+            label.Text = post.Title;
+            label.BackgroundColor = Color.Black;
+            label.TextColor = Color.White;
+            LayoutChoice_Set titleLayout = new TextblockLayout(label);
+            /*if (post.Title.Length > 20)
             {
-                TextblockLayout summaryLayout;
-                summaryLayout = new TextblockLayout(post.Title.Substring(0, 17) + "...");
+                LayoutChoice_Set summaryLayout;
+                summaryLayout = new ScoreShifted_Layout(new TextblockLayout(post.Title.Substring(0, 17) + "..."), LayoutScore.Get_CutOff_LayoutScore(0.5));
                 titleLayout = new LayoutUnion(summaryLayout, titleLayout);
             }*/
 

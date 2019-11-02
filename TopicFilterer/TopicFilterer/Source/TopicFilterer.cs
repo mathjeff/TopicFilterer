@@ -71,8 +71,10 @@ namespace TopicFilterer
             foreach (XmlNode node in items)
             {
                 Post post = this.postFromData(node);
-
-                posts.Add(post);
+                if (post.Title != null && post.Title != "")
+                    posts.Add(post);
+                else
+                    System.Diagnostics.Debug.WriteLine("Invalid post: " + post);
             }
             return posts;
         }
@@ -99,8 +101,7 @@ namespace TopicFilterer
                     previousScore = thisScore;
                 }
                 Post post = scoredPost.Post;
-                if (post.Source != null && post.Source != "" && post.Text != null && post.Text != "")
-                    gridBuilder.AddLayout(new PostView(post));
+                gridBuilder.AddLayout(new PostView(post));
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
