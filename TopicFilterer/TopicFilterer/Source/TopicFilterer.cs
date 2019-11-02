@@ -345,7 +345,9 @@ namespace TopicFilterer
                 "https://www.nature.com/ncomms.rss",
                 "https://www.cell.com/cell/current.rss",
                 "https://science.sciencemag.org/rss/current.xml",
-                "http://www.cell.com/cell-host-microbe/current.rss"
+                "http://www.cell.com/cell-host-microbe/current.rss",
+                "https://elifesciences.org/rss/recent.xml",
+                "https://elifesciences.org/rss/ahead.xml"
 
             };
             foreach (string urlText in urls)
