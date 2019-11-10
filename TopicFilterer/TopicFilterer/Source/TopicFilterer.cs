@@ -83,12 +83,12 @@ namespace TopicFilterer
         {
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder().Uniform();
 
-            List<ScoredPost> scored = this.rankPosts(posts);
+            List<AnalyzedPost> scored = this.rankPosts(posts);
             int maxCountToShow = 50;
             if (scored.Count > maxCountToShow)
                 scored = scored.GetRange(0, maxCountToShow);
             double previousScore = double.NegativeInfinity;
-            foreach (ScoredPost scoredPost in scored)
+            foreach (AnalyzedPost scoredPost in scored)
             {
                 double thisScore = scoredPost.Score;
                 if (thisScore != previousScore)
@@ -101,35 +101,66 @@ namespace TopicFilterer
                     previousScore = thisScore;
                 }
                 Post post = scoredPost.Post;
-                gridBuilder.AddLayout(new PostView(post));
+                gridBuilder.AddLayout(new PostView(scoredPost));
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
             this.LayoutStack.AddLayout(scrollLayout);
         }
 
-        private List<ScoredPost> rankPosts(List<Post> posts)
+        private List<AnalyzedPost> rankPosts(List<Post> posts)
         {
-            List<ScoredPost> scoredPosts = new List<ScoredPost>();
+            List<AnalyzedPost> scoredPosts = new List<AnalyzedPost>();
             foreach (Post post in posts)
             {
-                scoredPosts.Add(new ScoredPost(post, this.scorePost(post)));
+                scoredPosts.Add(this.analyzePost(post));
             }
             scoredPosts.Sort(new ScoredPost_Sorter());
             scoredPosts.Reverse();
-            List<ScoredPost> results = new List<ScoredPost>();
-            foreach (ScoredPost scored in scoredPosts)
+            List<AnalyzedPost> results = new List<AnalyzedPost>();
+            foreach (AnalyzedPost scored in scoredPosts)
             {
                 results.Add(scored);
             }
             return results;
         }
-        private double scorePost(Post post)
+
+        private AnalyzedPost analyzePost(Post post)
+        {
+            string title = post.Title;
+            double score = this.scoreTitle(title);
+
+            List<AnalyzedString> titleComponents = new List<AnalyzedString>();
+            List<String> words = new List<String>(title.Split(new char[] { ' ' }));
+            for (int i = 0; i < words.Count; i++)
+            {
+                List<String> hypotheticalWords = new List<String>(words);
+                hypotheticalWords.RemoveAt(i);
+                double hypotheticalScore = this.scoreTitle(string.Join(" ", hypotheticalWords));
+                double difference = score.CompareTo(hypotheticalScore);
+                titleComponents.Add(new AnalyzedString(words[i], difference));
+            }
+            for (int i = titleComponents.Count - 1; i >= 1; i--)
+            {
+                if (titleComponents[i].Score == titleComponents[i - 1].Score)
+                {
+                    titleComponents[i - 1] = new AnalyzedString(titleComponents[i - 1].Text + " " + titleComponents[i].Text, titleComponents[i].Score);
+                    titleComponents.RemoveAt(i);
+                }
+            }
+            return new AnalyzedPost(post, score, titleComponents);
+        }
+        private List<String> splitIntoWords(string text)
+        {
+            char[] wordSeparators = new char[] { ' ', ',', '.', '!', '?', '-' };
+            List<String> orderedWords = new List<string>(text.Split(wordSeparators));
+            return orderedWords;
+        }
+        private double scoreTitle(string title)
         {
             double score = 0;
-            string lowerTitle = post.Title.ToLower();
-            char[] wordSeparators = new char[] { ' ', ',', '.', '!', '?', '-' };
-            List<String> orderedWords = new List<string>(lowerTitle.Split(wordSeparators));
+            string lowerTitle = title.ToLower();
+            List<String> orderedWords = this.splitIntoWords(lowerTitle);
             HashSet<String> unorderedWords = new HashSet<string>(orderedWords);
 
             // generic negative filters

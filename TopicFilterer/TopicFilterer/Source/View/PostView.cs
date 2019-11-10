@@ -8,26 +8,38 @@ namespace TopicFilterer.View
 {
     class PostView : ContainerLayout
     {
-        public PostView(Post post)
+        public PostView(AnalyzedPost post)
         {
-            this.post = post;
+            this.post = post.Post;
             Button button = new Button();
             ButtonLayout buttonLayout = new ButtonLayout(button, "Open");
 
-            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
-            Label label = new Label();
-            label.Text = post.Title;
-            label.BackgroundColor = Color.Black;
-            label.TextColor = Color.White;
-            LayoutChoice_Set titleLayout = new TextblockLayout(label);
-            /*if (post.Title.Length > 20)
+            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder().Uniform();
+            // post title
+            foreach (AnalyzedString component in post.TitleComponents)
             {
-                LayoutChoice_Set summaryLayout;
-                summaryLayout = new ScoreShifted_Layout(new TextblockLayout(post.Title.Substring(0, 17) + "..."), LayoutScore.Get_CutOff_LayoutScore(0.5));
-                titleLayout = new LayoutUnion(summaryLayout, titleLayout);
-            }*/
+                Label label = new Label();
+                TextblockLayout textBlockLayout = new TextblockLayout(label);
+                if (component.Score > 0)
+                {
+                    label.TextColor = Color.Green;
+                }
+                else
+                {
+                    if (component.Score < 0)
+                    {
+                        label.TextColor = Color.Red;
+                    }
+                    else
+                    {
+                        label.TextColor = Color.White;
+                    }
+                }
+                label.Text = component.Text;
+                label.BackgroundColor = Color.Black;
+                builder.AddLayout(textBlockLayout);
+            }
 
-            builder.AddLayout(titleLayout);
             builder.AddLayout(new ButtonLayout(button));
 
             button.Clicked += Button_Clicked;

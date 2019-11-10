@@ -15,20 +15,33 @@ namespace TopicFilterer
         public string Title;
     }
 
-    public class ScoredPost
+    public class AnalyzedPost
     {
-        public ScoredPost(Post Post, double Score)
+        public AnalyzedPost(Post Post, double Score, List<AnalyzedString> analyzedTitle)
         {
             this.Post = Post;
             this.Score = Score;
+            this.TitleComponents = analyzedTitle;
         }
         public Post Post;
         public double Score;
+        public List<AnalyzedString> TitleComponents;
     }
 
-    public class ScoredPost_Sorter : IComparer<ScoredPost>
+    public class AnalyzedString
     {
-        public int Compare(ScoredPost a, ScoredPost b)
+        public AnalyzedString(string text, double score)
+        {
+            this.Text = text;
+            this.Score = score;
+        }
+        public string Text;
+        public double Score;
+    }
+
+    public class ScoredPost_Sorter : IComparer<AnalyzedPost>
+    {
+        public int Compare(AnalyzedPost a, AnalyzedPost b)
         {
             return a.Score.CompareTo(b.Score);
         }
