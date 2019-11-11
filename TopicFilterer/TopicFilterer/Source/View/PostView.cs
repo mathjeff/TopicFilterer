@@ -12,14 +12,13 @@ namespace TopicFilterer.View
         {
             this.post = post.Post;
             Button button = new Button();
-            ButtonLayout buttonLayout = new ButtonLayout(button, "Open");
 
-            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder().Uniform();
+            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
             // post title
             foreach (AnalyzedString component in post.TitleComponents)
             {
                 Label label = new Label();
-                TextblockLayout textBlockLayout = new TextblockLayout(label);
+                TextblockLayout textBlockLayout = new TextblockLayout(label, 16);
                 if (component.Score > 0)
                 {
                     label.TextColor = Color.Green;
@@ -40,7 +39,7 @@ namespace TopicFilterer.View
                 builder.AddLayout(textBlockLayout);
             }
 
-            builder.AddLayout(new ButtonLayout(button));
+            builder.AddLayout(new ButtonLayout(button, "Open", 16));
 
             button.Clicked += Button_Clicked;
 
