@@ -366,6 +366,7 @@ namespace TopicFilterer
             List<String> urls = new List<String>() {
                 "https://www.reddit.com/.rss",
                 "https://news.google.com/rss",
+                "https://hackaday.com/feed/",
 
                 "http://connect.biorxiv.org/biorxiv_xml.php?subject=all",
                 "https://www.nature.com/nature.rss",
