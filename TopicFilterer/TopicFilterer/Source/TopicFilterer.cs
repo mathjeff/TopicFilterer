@@ -19,7 +19,7 @@ namespace TopicFilterer
             startButton.Clicked += StartButton_Clicked;
 
             viewManager.SetLayout(this.LayoutStack);
-            this.LayoutStack.AddLayout(new ButtonLayout(startButton, "Start"));
+            this.LayoutStack.AddLayout(new ButtonLayout(startButton, "Start"), "Start");
             this.viewManager = viewManager;
             System.Diagnostics.Debug.WriteLine("Debugging enabled");
         }
@@ -105,7 +105,7 @@ namespace TopicFilterer
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
-            this.LayoutStack.AddLayout(scrollLayout);
+            this.LayoutStack.AddLayout(scrollLayout, "News");
         }
 
         private List<AnalyzedPost> rankPosts(List<Post> posts)
@@ -447,6 +447,6 @@ namespace TopicFilterer
         List<String> data = null;
 
         private ViewManager viewManager;
-        private LayoutStack LayoutStack = new LayoutStack();
+        private LayoutStack LayoutStack = new LayoutStack(false);
     }
 }
