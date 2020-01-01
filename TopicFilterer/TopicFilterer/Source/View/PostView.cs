@@ -39,7 +39,6 @@ namespace TopicFilterer.View
                 builder.AddLayout(textBlockLayout);
             }
 
-            builder.AddLayout(new TextblockLayout(post.Post.Source, 16));
             builder.AddLayout(new ButtonLayout(button, "Open", 16));
 
             button.Clicked += Button_Clicked;
