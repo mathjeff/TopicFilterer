@@ -39,6 +39,13 @@ namespace TopicFilterer.View
                 builder.AddLayout(textBlockLayout);
             }
 
+            Label link = new Label();
+            link.BackgroundColor = Color.Black;
+            link.TextColor = Color.White;
+            link.Text = post.Post.Source;
+            TextblockLayout linkLayout = new TextblockLayout(link, 16, false, true);
+            
+            builder.AddLayout(linkLayout);
             builder.AddLayout(new ButtonLayout(button, "Open", 16));
 
             button.Clicked += Button_Clicked;
