@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using TopicFilterer.View;
 using VisiPlacement;
 using Xamarin.Forms;
@@ -29,17 +30,51 @@ namespace TopicFilterer
             this.start();
         }
 
+        private TextblockLayout statusMessage(string text)
+        {
+            Label label = new Label();
+            label.Text = text;
+            label.TextColor = Color.White;
+            label.BackgroundColor = Color.Black;
+            return new TextblockLayout(label);
+        }
         private void start()
         {
-            List<string> data = this.getData();
+            this.LayoutStack.AddLayout(this.statusLayout, "results");
+            Label label = new Label();
+            this.statusLayout.SubLayout = this.statusMessage("Downloading data");
 
+            Task.Run(() =>
+            {
+                List<string> data = this.getData();
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.showDataAsync(data);
+                });
+            });
+        }
+
+        private void showDataAsync(List<String> data)
+        {
+            this.statusLayout.SubLayout = statusMessage("Analyzing data");
+            Task.Run(() =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.showData(data);
+                });
+            });
+        }
+
+        private void showData(List<String> data)
+        {
             List<Post> posts = new List<Post>();
             foreach (string thisData in data)
             {
                 posts.AddRange(this.parse(thisData));
             }
 
-            this.show(posts);
+            this.showPosts(posts);
         }
 
         private List<Post> parse(string text)
@@ -79,12 +114,12 @@ namespace TopicFilterer
             return posts;
         }
 
-        private void show(List<Post> posts)
+        private void showPosts(List<Post> posts)
         {
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder();
 
             List<AnalyzedPost> scored = this.rankPosts(posts);
-            int maxCountToShow = 50;
+            int maxCountToShow = 20;
             if (scored.Count > maxCountToShow)
                 scored = scored.GetRange(0, maxCountToShow);
             double previousScore = double.NegativeInfinity;
@@ -352,8 +387,8 @@ namespace TopicFilterer
         {
             if (this.data == null)
             {
-                //this.data = downloadData();
-                this.data = new List<String>() { getMockData() };
+                this.data = downloadData();
+                //this.data = new List<String>() { getMockData() };
             }
 
             return this.data;
@@ -364,15 +399,13 @@ namespace TopicFilterer
             WebClient webClient = new WebClient();
             List<String> texts = new List<String>();
             List<String> urls = new List<String>() {
-                /*
                 "https://www.reddit.com/.rss",
                 "https://news.google.com/rss",
                 "https://hackaday.com/feed/",
 
-                "http://connect.biorxiv.org/biorxiv_xml.php?subject=all"
-                */
+                "http://connect.biorxiv.org/biorxiv_xml.php?subject=all",
                 "https://www.nature.com/nature.rss",
-                /*"http://www.nature.com/nm/current_issue/rss",
+                "http://www.nature.com/nm/current_issue/rss",
                 "http://www.nature.com/nmeth/current_issue/rss",
                 "http://www.nature.com/nbt/current_issue/rss",
                 "http://www.nature.com/nrmicro/current_issue/rss",
@@ -381,7 +414,7 @@ namespace TopicFilterer
                 "https://science.sciencemag.org/rss/current.xml",
                 "http://www.cell.com/cell-host-microbe/current.rss",
                 "https://elifesciences.org/rss/recent.xml",
-                "https://elifesciences.org/rss/ahead.xml"*/
+                "https://elifesciences.org/rss/ahead.xml"
             };
             foreach (string urlText in urls)
             {
@@ -1754,5 +1787,6 @@ namespace TopicFilterer
 
         private ViewManager viewManager;
         private LayoutStack LayoutStack = new LayoutStack(false);
+        private ContainerLayout statusLayout = new ContainerLayout();
     }
 }
