@@ -119,7 +119,7 @@ namespace TopicFilterer
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder();
 
             List<AnalyzedPost> scored = this.rankPosts(posts);
-            int maxCountToShow = 20;
+            int maxCountToShow = 30;
             if (scored.Count > maxCountToShow)
                 scored = scored.GetRange(0, maxCountToShow);
             double previousScore = double.NegativeInfinity;
