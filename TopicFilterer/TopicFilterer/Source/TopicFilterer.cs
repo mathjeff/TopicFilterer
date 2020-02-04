@@ -40,6 +40,7 @@ namespace TopicFilterer
         }
         private void start()
         {
+            this.loadPostDatabase();
             this.LayoutStack.AddLayout(this.statusLayout, "results");
             Label label = new Label();
             this.statusLayout.SubLayout = this.statusMessage("Downloading data");
@@ -135,12 +136,20 @@ namespace TopicFilterer
                     label.TextColor = Color.White;
                     previousScore = thisScore;
                 }
-                Post post = scoredPost.Post;
-                gridBuilder.AddLayout(new PostView(scoredPost));
+                PostInteraction interaction = this.postDatabase.Get(scoredPost);
+                PostView postView = new PostView(interaction);
+                postView.PostClicked += PostView_PostClicked;
+                gridBuilder.AddLayout(postView);
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
             this.LayoutStack.AddLayout(scrollLayout, "News");
+        }
+
+        private void PostView_PostClicked(PostInteraction interaction)
+        {
+            this.savePostDatabase();
+            Device.OpenUri(new Uri(interaction.Post.Post.Source));
         }
 
         private List<AnalyzedPost> rankPosts(List<Post> posts)
@@ -382,7 +391,20 @@ namespace TopicFilterer
             return score;
         }
 
-
+        private void loadPostDatabase()
+        {
+            string text = this.fileIo.ReadAllText(this.postDatabase_filePath);
+            if (text != null && text != "")
+            {
+                this.postDatabase = PostInteraction_Database.Parse(text);
+            }
+        }
+        private void savePostDatabase()
+        {
+            this.postDatabase.ShrinkToSize(1000);
+            string text = this.postDatabase.ToString();
+            this.fileIo.EraseFileAndWriteContent(this.postDatabase_filePath, text);
+        }
         private List<String> getData()
         {
             if (this.data == null)
@@ -1788,5 +1810,8 @@ namespace TopicFilterer
         private ViewManager viewManager;
         private LayoutStack LayoutStack = new LayoutStack(false);
         private ContainerLayout statusLayout = new ContainerLayout();
+        private FileIo fileIo = new FileIo();
+        private string postDatabase_filePath = "posts.txt";
+        private PostInteraction_Database postDatabase = new PostInteraction_Database();
     }
 }

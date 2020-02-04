@@ -8,9 +8,12 @@ namespace TopicFilterer.View
 {
     class PostView : ContainerLayout
     {
-        public PostView(AnalyzedPost post)
+        public event ClickedHandler PostClicked;
+        public delegate void ClickedHandler(PostInteraction post);
+        public PostView(PostInteraction interaction)
         {
-            this.post = post.Post;
+            this.interaction = interaction;
+            AnalyzedPost post = interaction.Post;
             Button button = new Button();
 
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
@@ -39,11 +42,12 @@ namespace TopicFilterer.View
                 builder.AddLayout(textBlockLayout);
             }
 
-            Label link = new Label();
+            this.link = new Label();
             link.BackgroundColor = Color.Black;
             link.TextColor = Color.White;
             link.Text = post.Post.Source;
             TextblockLayout linkLayout = new TextblockLayout(link, 16, false, true);
+            this.updateLinkColor();
             
             builder.AddLayout(linkLayout);
             builder.AddLayout(new ButtonLayout(button, "Open", 16));
@@ -53,14 +57,32 @@ namespace TopicFilterer.View
             this.SubLayout = builder.BuildAnyLayout();
         }
 
-        private void Button_Clicked(object sender, EventArgs e)
+        private void updateLinkColor()
         {
-            string source = this.post.Source;
-            if (source != null && null != "")
+            if (this.interaction.Visited)
             {
-                Device.OpenUri(new Uri(this.post.Source));
+                this.link.TextColor = Color.Orange;
+            }
+            else
+            {
+                this.link.TextColor = Color.White;
             }
         }
-        Post post;
+
+        private void Button_Clicked(object sender, EventArgs e)
+        {
+            this.interaction.Visited = true;
+            this.updateLinkColor();
+            string source = this.interaction.Post.Post.Source;
+            if (source != null && null != "")
+            {
+                if (this.PostClicked != null)
+                {
+                    this.PostClicked.Invoke(this.interaction);
+                }
+            }
+        }
+        PostInteraction interaction;
+        Label link = new Label();
     }
 }
