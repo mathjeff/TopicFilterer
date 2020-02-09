@@ -41,41 +41,7 @@ namespace TopicFilterer
         private void start()
         {
             this.loadPostDatabase();
-            this.LayoutStack.AddLayout(this.statusLayout, "results");
-            Label label = new Label();
-            this.statusLayout.SubLayout = this.statusMessage("Downloading data");
-
-            Task.Run(() =>
-            {
-                List<string> data = this.getData();
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    this.showDataAsync(data);
-                });
-            });
-        }
-
-        private void showDataAsync(List<String> data)
-        {
-            this.statusLayout.SubLayout = statusMessage("Analyzing data");
-            Task.Run(() =>
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    this.showData(data);
-                });
-            });
-        }
-
-        private void showData(List<String> data)
-        {
-            List<Post> posts = new List<Post>();
-            foreach (string thisData in data)
-            {
-                posts.AddRange(this.parse(thisData));
-            }
-
-            this.showPosts(posts);
+            this.startGetData();
         }
 
         private List<Post> parse(string text)
@@ -115,16 +81,19 @@ namespace TopicFilterer
             return posts;
         }
 
-        private void showPosts(List<Post> posts)
+        private void showPosts()
         {
+            List<AnalyzedPost> posts = new List<AnalyzedPost>(this.analyzedPosts);
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder();
+            gridBuilder.AddLayout(this.downloadStatus_container);
 
-            List<AnalyzedPost> scored = this.rankPosts(posts);
+            this.sortPosts(posts);
+
             int maxCountToShow = 30;
-            if (scored.Count > maxCountToShow)
-                scored = scored.GetRange(0, maxCountToShow);
+            if (posts.Count > maxCountToShow)
+                posts = posts.GetRange(0, maxCountToShow);
             double previousScore = double.NegativeInfinity;
-            foreach (AnalyzedPost scoredPost in scored)
+            foreach (AnalyzedPost scoredPost in posts)
             {
                 double thisScore = scoredPost.Score;
                 if (thisScore != previousScore)
@@ -143,7 +112,10 @@ namespace TopicFilterer
             }
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
-            this.LayoutStack.AddLayout(scrollLayout, "News");
+            this.downloadsStatus.NumUrlsDownloadedButNotShown = 0;
+            this.update_numCompletedDownloads_status();
+
+            this.resultsLayout.SubLayout = scrollLayout;
         }
 
         private void PostView_PostClicked(PostInteraction interaction)
@@ -152,21 +124,19 @@ namespace TopicFilterer
             Device.OpenUri(new Uri(interaction.Post.Post.Source));
         }
 
-        private List<AnalyzedPost> rankPosts(List<Post> posts)
+        private List<AnalyzedPost> analyzePosts(List<Post> posts)
         {
             List<AnalyzedPost> scoredPosts = new List<AnalyzedPost>();
             foreach (Post post in posts)
             {
                 scoredPosts.Add(this.analyzePost(post));
             }
-            scoredPosts.Sort(new ScoredPost_Sorter());
-            scoredPosts.Reverse();
-            List<AnalyzedPost> results = new List<AnalyzedPost>();
-            foreach (AnalyzedPost scored in scoredPosts)
-            {
-                results.Add(scored);
-            }
-            return results;
+            return scoredPosts;
+        }
+        private void sortPosts(List<AnalyzedPost> posts)
+        {
+            posts.Sort(new ScoredPost_Sorter());
+            posts.Reverse();
         }
 
         private AnalyzedPost analyzePost(Post post)
@@ -405,21 +375,121 @@ namespace TopicFilterer
             string text = this.postDatabase.ToString();
             this.fileIo.EraseFileAndWriteContent(this.postDatabase_filePath, text);
         }
-        private List<String> getData()
+        private void startGetData()
         {
-            if (this.data == null)
+            List<ValueProvider<String>> pendingDownloads;
+            if (true)
             {
-                this.data = downloadData();
-                //this.data = new List<String>() { getMockData() };
+                pendingDownloads = this.startDownloadData();
             }
+            else
+            {
+                pendingDownloads = new List<ValueProvider<string>>() { new ConstantValueProvider<String>(getMockData()) };
+            }
+            this.pendingDownloads = pendingDownloads;
+            this.analyzedPosts = new List<AnalyzedPost>();
+            this.downloadsStatus = new DownloadsStatus(this.pendingDownloads.Count);
 
-            return this.data;
+            this.setupUpdateLayout();
+
+            this.resultsLayout = new ContainerLayout();
+            this.resultsLayout.SubLayout = this.downloadStatus_container;
+            this.LayoutStack.AddLayout(resultsLayout, "News");
+
+            this.downloadNextUrl();
+        }
+        private void setupUpdateLayout()
+        {
+            this.cannotUpdate_textBlock = new Label();
+            this.cannotUpdate_layout = new TextblockLayout(this.cannotUpdate_textBlock, 32);
+            this.cannotUpdate_textBlock.BackgroundColor = Color.Black;
+            this.cannotUpdate_textBlock.TextColor = Color.White;
+            this.updateButton = new Button();
+            this.updateButton.Clicked += UpdateButton_Clicked;
+            this.updateButton_layout = new ButtonLayout(this.updateButton, "", 32);
+            this.downloadStatus_container = new ContainerLayout();
+            this.update_numCompletedDownloads_status();
         }
 
-        private List<String> downloadData()
+        private void UpdateButton_Clicked(object sender, EventArgs e)
+        {
+            this.showPosts();
+        }
+
+        private void downloadNextUrl()
+        {
+            System.Diagnostics.Debug.WriteLine("downloadNextUrl");
+            if (this.pendingDownloads.Count > 0)
+            {
+                ValueProvider<String> request = this.pendingDownloads[0];
+                this.pendingDownloads.RemoveAt(0);
+
+                Task.Run(() =>
+                {
+                    System.Diagnostics.Debug.WriteLine("downloadNextUrl calling .Get()");
+                    String text = request.Get();
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        this.downloadCompleted(text);
+                    });
+                });
+            }
+        }
+        private void downloadCompleted(String text)
+        {
+            System.Diagnostics.Debug.WriteLine("downloadCompleted");
+            this.onReceivedData(text);
+            this.downloadNextUrl();
+        }
+        private void onReceivedData(String text)
+        {
+            System.Diagnostics.Debug.WriteLine("onRecievedData");
+            this.downloadsStatus.NumUrlsLeftToDownload--;
+            if (text != null)
+            {
+                this.downloadsStatus.NumUrlsDownloadedButNotShown++;
+                List<Post> posts = this.parse(text);
+                List<AnalyzedPost> analyzedPosts = this.analyzePosts(posts);
+                this.analyzedPosts.AddRange(analyzedPosts);
+            }
+            this.update_numCompletedDownloads_status();
+        }
+        private void update_numCompletedDownloads_status()
+        {
+            string message;
+            if (this.downloadsStatus.NumUrlsLeftToDownload < 1 && this.downloadsStatus.NumUrlsDownloadedButNotShown < 1)
+            {
+                message = "Downloads Complete";
+            }
+            else
+            {
+                if (this.downloadsStatus.NumUrlsLeftToDownload >= this.downloadsStatus.NumToDownload)
+                {
+                    message = "Downloading 0/" + this.downloadsStatus.NumToDownload;
+                }
+                else
+                {
+                    message = "" + this.downloadsStatus.NumUrlsLeftToDownload + " urls left to download; " + this.downloadsStatus.NumUrlsDownloadedButNotShown + " new urls to show";
+                }
+            }
+            System.Diagnostics.Debug.WriteLine("NumCompletedDownloads status message: '" + message + "'");
+
+            if (this.downloadsStatus.NumUrlsDownloadedButNotShown > 0)
+            {
+                this.downloadStatus_container.SubLayout = this.updateButton_layout;
+                this.updateButton.Text = message;
+            }
+            else
+            {
+                this.downloadStatus_container.SubLayout = this.cannotUpdate_layout;
+                this.cannotUpdate_textBlock.Text = message;
+            }
+        }
+
+        private List<ValueProvider<String>> startDownloadData()
         {
             WebClient webClient = new WebClient();
-            List<String> texts = new List<String>();
+            List<ValueProvider<String>> requests = new List<ValueProvider<string>>();
             List<String> urls = new List<String>() {
                 "https://www.reddit.com/.rss",
                 "https://news.google.com/rss",
@@ -440,19 +510,10 @@ namespace TopicFilterer
             };
             foreach (string urlText in urls)
             {
-                try
-                {
-                    byte[] data = webClient.DownloadData(urlText);
-                    string text = System.Text.Encoding.UTF8.GetString(data);
-                    System.Diagnostics.Debug.Write("From " + urlText + ", downloaded data of " + text);
-                    texts.Add(text);
-                }
-                catch (WebException e)
-                {
-                    System.Diagnostics.Debug.WriteLine("Failed to open " + urlText + ", " + e);
-                }
+                UrlDownloader request = new UrlDownloader(webClient, urlText);
+                requests.Add(request);
             }
-            return texts;
+            return requests;
         }
 
         private string getMockData()
@@ -1805,13 +1866,24 @@ namespace TopicFilterer
             return this.LayoutStack.GoBack();
         }
 
-        List<String> data = null;
+        List<String> completedDownloads = null;
+        List<ValueProvider<String>> pendingDownloads = null;
+        List<AnalyzedPost> analyzedPosts = null;
 
         private ViewManager viewManager;
         private LayoutStack LayoutStack = new LayoutStack(false);
-        private ContainerLayout statusLayout = new ContainerLayout();
         private FileIo fileIo = new FileIo();
         private string postDatabase_filePath = "posts.txt";
         private PostInteraction_Database postDatabase = new PostInteraction_Database();
+
+        private ContainerLayout resultsLayout;
+
+        private DownloadsStatus downloadsStatus;
+        private ContainerLayout downloadStatus_container;
+        private Button updateButton;
+        private ButtonLayout updateButton_layout;
+        private TextblockLayout cannotUpdate_layout;
+        private Label cannotUpdate_textBlock;
+        
     }
 }
