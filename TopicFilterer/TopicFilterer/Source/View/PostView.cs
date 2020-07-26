@@ -37,16 +37,13 @@ namespace TopicFilterer.View
                         label.TextColor = Color.White;
                     }
                 }
-                label.Text = component.Text;
+                textBlockLayout.setText(component.Text);
                 label.BackgroundColor = Color.Black;
                 builder.AddLayout(textBlockLayout);
             }
 
-            this.link = new Label();
-            link.BackgroundColor = Color.Black;
-            link.TextColor = Color.White;
-            link.Text = post.Post.Source;
-            TextblockLayout linkLayout = new TextblockLayout(link, 16, false, true);
+            this.linkLayout = new TextblockLayout(post.Post.Source, 16, false, true);
+            this.linkLayout.setBackgroundColor(Color.Black);
             this.updateLinkColor();
             
             builder.AddLayout(linkLayout);
@@ -61,11 +58,11 @@ namespace TopicFilterer.View
         {
             if (this.interaction.Visited)
             {
-                this.link.TextColor = Color.Orange;
+                this.linkLayout.setTextColor(Color.Orange);
             }
             else
             {
-                this.link.TextColor = Color.White;
+                this.linkLayout.setTextColor(Color.White);
             }
         }
 
@@ -83,6 +80,6 @@ namespace TopicFilterer.View
             }
         }
         PostInteraction interaction;
-        Label link = new Label();
+        TextblockLayout linkLayout;
     }
 }

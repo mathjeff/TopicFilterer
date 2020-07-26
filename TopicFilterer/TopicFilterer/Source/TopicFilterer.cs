@@ -30,14 +30,6 @@ namespace TopicFilterer
             this.start();
         }
 
-        private TextblockLayout statusMessage(string text)
-        {
-            Label label = new Label();
-            label.Text = text;
-            label.TextColor = Color.White;
-            label.BackgroundColor = Color.Black;
-            return new TextblockLayout(label);
-        }
         private void start()
         {
             this.loadPostDatabase();
@@ -98,11 +90,12 @@ namespace TopicFilterer
                 double thisScore = scoredPost.Score;
                 if (thisScore != previousScore)
                 {
-                    Label label = new Label();
-                    label.Text = "Score: " + thisScore;
-                    gridBuilder.AddLayout(new TextblockLayout(label, 30));
-                    label.BackgroundColor = Color.Black;
-                    label.TextColor = Color.White;
+                    string text = "Score: " + thisScore;
+                    TextblockLayout textBlockLayout = new TextblockLayout(text, 30);
+                    textBlockLayout.setBackgroundColor(Color.Black);
+                    textBlockLayout.setTextColor(Color.White);
+                    gridBuilder.AddLayout(textBlockLayout);
+
                     previousScore = thisScore;
                 }
                 PostInteraction interaction = this.postDatabase.Get(scoredPost);
@@ -400,10 +393,9 @@ namespace TopicFilterer
         }
         private void setupUpdateLayout()
         {
-            this.cannotUpdate_textBlock = new Label();
-            this.cannotUpdate_layout = new TextblockLayout(this.cannotUpdate_textBlock, 32);
-            this.cannotUpdate_textBlock.BackgroundColor = Color.Black;
-            this.cannotUpdate_textBlock.TextColor = Color.White;
+            this.cannotUpdate_layout = new TextblockLayout("", 32);
+            this.cannotUpdate_layout.setTextColor(Color.White);
+            this.cannotUpdate_layout.setBackgroundColor(Color.Black);
             this.updateButton = new Button();
             this.updateButton.Clicked += UpdateButton_Clicked;
             this.updateButton_layout = new ButtonLayout(this.updateButton, "", 32);
@@ -482,7 +474,7 @@ namespace TopicFilterer
             else
             {
                 this.downloadStatus_container.SubLayout = this.cannotUpdate_layout;
-                this.cannotUpdate_textBlock.Text = message;
+                this.cannotUpdate_layout.setText(message);
             }
         }
 
@@ -1882,8 +1874,6 @@ namespace TopicFilterer
         private ContainerLayout downloadStatus_container;
         private Button updateButton;
         private ButtonLayout updateButton_layout;
-        private TextblockLayout cannotUpdate_layout;
-        private Label cannotUpdate_textBlock;
-        
+        private TextblockLayout cannotUpdate_layout;        
     }
 }
