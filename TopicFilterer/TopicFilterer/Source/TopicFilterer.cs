@@ -9,20 +9,47 @@ using Xamarin.Forms;
 
 namespace TopicFilterer
 {
-    class TopicFilterer
+    class TopicFilterer : OnBack_Listener
     {
         public TopicFilterer(ContentView contentView)
         {
             ViewManager viewManager = new ViewManager(contentView, null);
 
-            Button startButton = new Button();
+            Button customizeButton = new Button();
+            customizeButton.Clicked += CustomizeButton_Clicked;
+            ButtonLayout customizeButtonLayout = new ButtonLayout(customizeButton, "Customize");
 
+            Button startButton = new Button();
             startButton.Clicked += StartButton_Clicked;
+            ButtonLayout startButtonLayout = new ButtonLayout(startButton, "Start");
 
             viewManager.SetLayout(this.LayoutStack);
-            this.LayoutStack.AddLayout(new ButtonLayout(startButton, "Start"), "Start");
+
+            LayoutChoice_Set startLayout = new Vertical_GridLayout_Builder().AddLayout(customizeButtonLayout).AddLayout(startButtonLayout).Build();
+
+            this.LayoutStack.AddLayout(startLayout, "Welcome", -1);
             this.viewManager = viewManager;
-            System.Diagnostics.Debug.WriteLine("Debugging enabled");
+
+            this.loadPostDatabase();
+            this.loadPreferences();
+            this.preferencesLayout = new CustomizePreferences_Layout(this.userPreferences_database);
+        }
+
+        private void CustomizeButton_Clicked(object sender, EventArgs e)
+        {
+            this.LayoutStack.AddLayout(this.preferencesLayout, "Customize", this);
+        }
+
+        public void OnBack(LayoutChoice_Set layout)
+        {
+            if (layout == this.preferencesLayout)
+            {
+                this.userPreferences_database.FeedUrls = this.preferencesLayout.FeedUrls;
+                string serialized = (new TextConverter()).ConvertToString(this.userPreferences_database);
+                this.fileIo.EraseFileAndWriteContent(this.userPreferences_filePath, serialized);
+                return;
+            }
+            throw new Exception("Unrecognized layout " + layout);
         }
 
         private void StartButton_Clicked(object sender, EventArgs e)
@@ -32,7 +59,6 @@ namespace TopicFilterer
 
         private void start()
         {
-            this.loadPostDatabase();
             this.startGetData();
         }
 
@@ -362,6 +388,15 @@ namespace TopicFilterer
                 this.postDatabase = PostInteraction_Database.Parse(text);
             }
         }
+        private void loadPreferences()
+        {
+            string text = this.fileIo.ReadAllText(this.userPreferences_filePath);
+
+            if (text != null && text != "")
+            {
+                this.userPreferences_database = UserPreferences_Database.Parse(text);
+            }
+        }
         private void savePostDatabase()
         {
             this.postDatabase.ShrinkToSize(1000);
@@ -482,7 +517,8 @@ namespace TopicFilterer
         {
             WebClient webClient = new WebClient();
             List<ValueProvider<String>> requests = new List<ValueProvider<string>>();
-            List<String> urls = new List<String>() {
+            IEnumerable<String> urls = this.userPreferences_database.FeedUrls;
+            /*List<String> urls = new List<String>() {
                 "https://www.reddit.com/.rss",
                 "https://news.google.com/rss",
                 "https://hackaday.com/feed/",
@@ -499,7 +535,7 @@ namespace TopicFilterer
                 "http://www.cell.com/cell-host-microbe/current.rss",
                 "https://elifesciences.org/rss/recent.xml",
                 "https://elifesciences.org/rss/ahead.xml"
-            };
+            };*/
             foreach (string urlText in urls)
             {
                 UrlDownloader request = new UrlDownloader(webClient, urlText);
@@ -1866,6 +1902,7 @@ namespace TopicFilterer
         private LayoutStack LayoutStack = new LayoutStack(false);
         private FileIo fileIo = new FileIo();
         private string postDatabase_filePath = "posts.txt";
+        private string userPreferences_filePath = "preferences.txt";
         private PostInteraction_Database postDatabase = new PostInteraction_Database();
 
         private ContainerLayout resultsLayout;
@@ -1874,6 +1911,8 @@ namespace TopicFilterer
         private ContainerLayout downloadStatus_container;
         private Button updateButton;
         private ButtonLayout updateButton_layout;
-        private TextblockLayout cannotUpdate_layout;        
+        private TextblockLayout cannotUpdate_layout;
+        private UserPreferences_Database userPreferences_database = new UserPreferences_Database();
+        private CustomizePreferences_Layout preferencesLayout;
     }
 }

@@ -17,6 +17,18 @@ namespace TopicFilterer
             }
             return result.ToString();
         }
+        public string ConvertToString(UserPreferences_Database preferencesDatabase)
+        {
+            StringBuilder result = new StringBuilder();
+            foreach (string feedUrl in preferencesDatabase.FeedUrls)
+            {
+                Dictionary<string, string> properties = new Dictionary<string, string>();
+                properties[this.FeedUrl_Tag] = feedUrl;
+                string text = this.ConvertToString(properties, this.FeedTag);
+                result.Append(text);
+            }
+            return result.ToString();
+        }
         public string ConvertToString(PostInteraction post)
         {
             Dictionary<string, string> properties = new Dictionary<string, string>();
@@ -48,20 +60,43 @@ namespace TopicFilterer
             return value.ToString();
         }
 
-        public ParseResult Parse(string text)
+        public List<PostInteraction> ParsePostInteractions(string text)
         {
-            ParseResult result = new ParseResult();
+            List<PostInteraction> interactions = new List<PostInteraction>();
             IEnumerable<XmlNode> nodes = this.ParseToXmlNodes(text);
             foreach (XmlNode node in nodes)
             {
                 if (node.Name == this.PostTag)
                 {
-                    result.PostInteractions.Add(this.ReadInteraction(node));
+                    interactions.Add(this.ReadInteraction(node));
                     continue;
                 }
                 throw new InvalidDataException("Unrecognized node: <" + node.Name + ">");
             }
-            return result;
+            return interactions;
+        }
+
+        public UserPreferences_Database ParseUserPreferences(string text)
+        {
+            UserPreferences_Database db = new UserPreferences_Database();
+            IEnumerable<XmlNode> nodes = this.ParseToXmlNodes(text);
+            List<string> feedUrls = new List<string>();
+            foreach (XmlNode node in nodes)
+            {
+                if (node.Name == this.FeedTag)
+                {
+                    foreach (XmlNode child in node.ChildNodes)
+                    {
+                        if (child.Name == this.FeedUrl_Tag)
+                        {
+                            string url = this.ReadText(child);
+                            feedUrls.Add(url);
+                        }
+                    }
+                }
+            }
+            db.FeedUrls = feedUrls;
+            return db;
         }
 
         public PostInteraction ReadInteraction(XmlNode nodeRepresentation)
@@ -146,13 +181,22 @@ namespace TopicFilterer
         {
             get
             {
-                return "Visited";
+                return "visited";
             }
         }
-    }
-
-    public class ParseResult
-    {
-        public List<PostInteraction> PostInteractions = new List<PostInteraction>();
+        public string FeedTag
+        {
+            get
+            {
+                return "feed";
+            }
+        }
+        public string FeedUrl_Tag
+        {
+            get
+            {
+                return "url";
+            }
+        }
     }
 }

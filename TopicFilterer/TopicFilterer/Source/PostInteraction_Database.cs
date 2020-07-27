@@ -8,9 +8,9 @@ namespace TopicFilterer
     {
         public static PostInteraction_Database Parse(string text)
         {
-            ParseResult result = (new TextConverter()).Parse(text);
+            List<PostInteraction> result = (new TextConverter()).ParsePostInteractions(text);
             PostInteraction_Database db = new PostInteraction_Database();
-            db.AddPosts(result.PostInteractions);
+            db.AddPosts(result);
             return db;
         }
 
