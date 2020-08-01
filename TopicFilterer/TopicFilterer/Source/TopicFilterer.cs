@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using TopicFilterer.Scoring;
 using TopicFilterer.View;
 using VisiPlacement;
 using Xamarin.Forms;
@@ -32,7 +33,7 @@ namespace TopicFilterer
 
             this.loadPostDatabase();
             this.loadPreferences();
-            this.preferencesLayout = new CustomizePreferences_Layout(this.userPreferences_database);
+            this.preferencesLayout = CustomizePreferences_Layout.New(this.userPreferences_database, this.LayoutStack);
         }
 
         private void CustomizeButton_Clicked(object sender, EventArgs e)
@@ -44,7 +45,6 @@ namespace TopicFilterer
         {
             if (layout == this.preferencesLayout)
             {
-                this.userPreferences_database.FeedUrls = this.preferencesLayout.FeedUrls;
                 string serialized = (new TextConverter()).ConvertToString(this.userPreferences_database);
                 this.fileIo.EraseFileAndWriteContent(this.userPreferences_filePath, serialized);
                 return;
@@ -190,6 +190,16 @@ namespace TopicFilterer
             return orderedWords;
         }
         private double scoreTitle(string title)
+        {
+            List<TextRule> rules = this.userPreferences_database.ScoringRules;
+            double score = 0;
+            foreach (TextRule rule in rules)
+            {
+                score += rule.computeScore(title);
+            }
+            return score;
+        }
+        private double scoreTitle_old(string title)
         {
             double score = 0;
             string lowerTitle = title.ToLower();
@@ -574,12 +584,11 @@ namespace TopicFilterer
             return this.LayoutStack.GoBack();
         }
 
-        List<String> completedDownloads = null;
         List<ValueProvider<String>> pendingDownloads = null;
         List<AnalyzedPost> analyzedPosts = null;
 
         private ViewManager viewManager;
-        private LayoutStack LayoutStack = new LayoutStack(false);
+        private LayoutStack LayoutStack = new LayoutStack(true);
         private FileIo fileIo = new FileIo();
         private string postDatabase_filePath = "posts.txt";
         private string userPreferences_filePath = "preferences.txt";
@@ -593,6 +602,6 @@ namespace TopicFilterer
         private ButtonLayout updateButton_layout;
         private TextblockLayout cannotUpdate_layout;
         private UserPreferences_Database userPreferences_database = new UserPreferences_Database();
-        private CustomizePreferences_Layout preferencesLayout;
+        private LayoutChoice_Set preferencesLayout;
     }
 }

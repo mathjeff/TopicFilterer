@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
+using TopicFilterer.Scoring;
 
 namespace TopicFilterer
 {
@@ -27,6 +28,11 @@ namespace TopicFilterer
                 string text = this.ConvertToString(properties, this.FeedTag);
                 result.Append(text);
             }
+            foreach (TextRule rule in preferencesDatabase.ScoringRules)
+            {
+                string text = this.ConvertToString(rule);
+                result.Append(text);
+            }
             return result.ToString();
         }
         public string ConvertToString(PostInteraction post)
@@ -36,6 +42,51 @@ namespace TopicFilterer
             if (post.Visited)
                 properties[this.PostVisited_Tag] = this.ConvertToStringBody(true);
             return this.ConvertToString(properties, PostTag);
+        }
+        public string ConvertToString(TextRule rule)
+        {
+            Dictionary<string, string> properties = new Dictionary<string, string>();
+            properties[this.ScoreTag] = this.ConvertToStringBody(rule.ScoreIfMatches);
+            properties[this.ScoringRulePredicate_Tag] = this.ConvertToString(rule.Criteria);
+            return this.ConvertToString(properties, this.ScoringRule_Tag);
+        }
+        public string ConvertToString(TextPredicate predicate)
+        {
+            ContainsWord_Predicate contains = predicate as ContainsWord_Predicate;
+            if (contains != null)
+                return this.ConvertToString(contains);
+
+            AndPredicate and = predicate as AndPredicate;
+            if (and != null)
+                return this.ConvertToString(and);
+
+            OrPredicate or = predicate as OrPredicate;
+            if (or != null)
+                return this.ConvertToString(or);
+
+            throw new Exception("Unrecognized predicate: " + predicate);
+        }
+        public string ConvertToString(ContainsWord_Predicate predicate)
+        {
+            return this.ConvertToString(predicate.Text, this.ContainsWord_Tag);
+        }
+        public string ConvertToString(AndPredicate predicate)
+        {
+            StringBuilder content = new StringBuilder();
+            foreach (TextPredicate child in predicate.Children)
+            {
+                content.Append(this.ConvertToString(child));
+            }
+            return this.ConvertToString(content.ToString(), this.And_Tag);
+        }
+        public string ConvertToString(OrPredicate predicate)
+        {
+            StringBuilder content = new StringBuilder();
+            foreach (TextPredicate child in predicate.Children)
+            {
+                content.Append(this.ConvertToString(child));
+            }
+            return this.ConvertToString(content.ToString(), this.Or_Tag);
         }
         public string ConvertToString(Dictionary<string, string> properties, string objectName)
         {
@@ -56,6 +107,10 @@ namespace TopicFilterer
             return "<" + objectName + ">" + stringBody + "</" + objectName + ">";
         }
         private string ConvertToStringBody(bool value)
+        {
+            return value.ToString();
+        }
+        private string ConvertToStringBody(double value)
         {
             return value.ToString();
         }
@@ -81,6 +136,7 @@ namespace TopicFilterer
             UserPreferences_Database db = new UserPreferences_Database();
             IEnumerable<XmlNode> nodes = this.ParseToXmlNodes(text);
             List<string> feedUrls = new List<string>();
+            List<TextRule> scoringRules = new List<TextRule>();
             foreach (XmlNode node in nodes)
             {
                 if (node.Name == this.FeedTag)
@@ -94,8 +150,14 @@ namespace TopicFilterer
                         }
                     }
                 }
+                if (node.Name == this.ScoringRule_Tag)
+                {
+                    TextRule rule = this.ReadScoringRule(node);
+                    scoringRules.Add(rule);
+                }
             }
             db.FeedUrls = feedUrls;
+            db.ScoringRules = scoringRules;
             return db;
         }
 
@@ -118,9 +180,72 @@ namespace TopicFilterer
             }
             return interaction;
         }
+
+        public TextRule ReadScoringRule(XmlNode nodeRepresentation)
+        {
+            TextPredicate criteria = null;
+            double score = 0;
+            foreach (XmlNode child in nodeRepresentation.ChildNodes)
+            {
+                if (child.Name == ScoringRulePredicate_Tag)
+                {
+                    foreach (XmlNode grandchild in child.ChildNodes)
+                    {
+                        criteria = this.ReadTextPredicate(grandchild);
+                        continue;
+                    }
+                }
+                if (child.Name == this.ScoreTag)
+                {
+                    score = this.ReadDouble(child);
+                    continue;
+                }
+            }
+            TextRule rule = new TextRule(criteria, score);
+            return rule;
+        }
+        public TextPredicate ReadTextPredicate(XmlNode nodeRepresentation)
+        {
+            if (nodeRepresentation.Name == this.ContainsWord_Tag)
+                return this.Read_ContainsWord_Predicate(nodeRepresentation);
+            if (nodeRepresentation.Name == this.And_Tag)
+                return this.Read_AndPredicate(nodeRepresentation);
+            if (nodeRepresentation.Name == this.Or_Tag)
+                return this.Read_OrPredicate(nodeRepresentation);
+            throw new Exception("Unrecognized text predicate " + nodeRepresentation.Name);
+        }
+        public ContainsWord_Predicate Read_ContainsWord_Predicate(XmlNode nodeRepresentation)
+        {
+            string text = this.ReadText(nodeRepresentation);
+            return new ContainsWord_Predicate(text);
+        }
+        public AndPredicate Read_AndPredicate(XmlNode nodeRepresentation)
+        {
+            AndPredicate predicate = new AndPredicate();
+            foreach (XmlNode childNode in nodeRepresentation.ChildNodes)
+            {
+                TextPredicate child = this.ReadTextPredicate(childNode);
+                predicate.AddChild(child);
+            }
+            return predicate;
+        }
+        public OrPredicate Read_OrPredicate(XmlNode nodeRepresentation)
+        {
+            OrPredicate predicate = new OrPredicate();
+            foreach (XmlNode childNode in nodeRepresentation.ChildNodes)
+            {
+                TextPredicate child = this.ReadTextPredicate(childNode);
+                predicate.AddChild(child);
+            }
+            return predicate;
+        }
         private bool ReadBool(XmlNode nodeRepresentation)
         {
             return bool.Parse(this.ReadText(nodeRepresentation));
+        }
+        private double ReadDouble(XmlNode nodeRepresentation)
+        {
+            return double.Parse(this.ReadText(nodeRepresentation));
         }
         private string ReadText(XmlNode nodeRepresentation)
         {
@@ -196,6 +321,52 @@ namespace TopicFilterer
             get
             {
                 return "url";
+            }
+        }
+
+        public string ScoringRule_Tag
+        {
+            get
+            {
+                return "scoringRule";
+            }
+        }
+
+        public string ScoringRulePredicate_Tag
+        {
+            get
+            {
+                return "if";
+            }
+        }
+
+        public string ScoreTag
+        {
+            get
+            {
+                return "score";
+            }
+        }
+
+        public string And_Tag
+        {
+            get
+            {
+                return "and";
+            }
+        }
+        public string Or_Tag
+        {
+            get
+            {
+                return "or";
+            }
+        }
+        public string ContainsWord_Tag
+        {
+            get
+            {
+                return "containsWord";
             }
         }
     }
