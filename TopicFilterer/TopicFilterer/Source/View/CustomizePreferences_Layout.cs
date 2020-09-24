@@ -366,9 +366,12 @@ namespace TopicFilterer.View
 
         private void NewFeedButton_Clicked(object sender, EventArgs e)
         {
-            this.FeedUrls.Add(this.newFeedBox.Text);
-            this.newFeedBox.Text = "";
-            this.updateLayout();
+            if (this.newFeedBox.Text != null && this.newFeedBox.Text != "")
+            {
+                this.FeedUrls.Add(this.newFeedBox.Text);
+                this.newFeedBox.Text = "";
+                this.updateLayout();
+            }
         }
 
         private void updateLayout()
