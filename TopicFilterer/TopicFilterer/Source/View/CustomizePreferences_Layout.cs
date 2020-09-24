@@ -42,7 +42,7 @@ namespace TopicFilterer.View
             newRuleButton.Clicked += NewRuleButton_Clicked;
             grid.AddLayout(new ButtonLayout(newRuleButton, "New Rule"));
 
-            this.SubLayout = grid;
+            this.SubLayout = ScrollLayout.New(grid);
         }
 
         public void OnBack(LayoutChoice_Set layout)
