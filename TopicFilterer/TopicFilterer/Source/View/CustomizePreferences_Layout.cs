@@ -11,12 +11,26 @@ namespace TopicFilterer.View
 {
     class CustomizePreferences_Layout : ContainerLayout
     {
-        public static LayoutChoice_Set New(UserPreferences_Database userPreferencesDatabase, LayoutStack layoutStack)
+        public event Import RequestImport;
+        public delegate void Import(string text);
+
+        public CustomizePreferences_Layout(UserPreferences_Database userPreferencesDatabase, LayoutStack layoutStack)
         {
-            return new MenuLayoutBuilder(layoutStack)
-                .AddLayout("Rules", new Customize_ScoringRules_Layout(userPreferencesDatabase, layoutStack))
-                .AddLayout("Feeds", new Customize_FeedUrls_Layout(userPreferencesDatabase))
+            ImportPreferences_Layout importLayout = new ImportPreferences_Layout();
+            importLayout.RequestImport += ImportLayout_RequestImport;
+
+            this.SubLayout = new MenuLayoutBuilder(layoutStack)
+                .AddLayout("Add/Edit Rules", new Customize_ScoringRules_Layout(userPreferencesDatabase, layoutStack))
+                .AddLayout("Add/Edit Feeds", new Customize_FeedUrls_Layout(userPreferencesDatabase))
+                .AddLayout("Import Preferences", importLayout)
+                .AddLayout("Export Preferences", new ExportPreferences_Layout(userPreferencesDatabase, layoutStack))
                 .Build();
+        }
+
+        private void ImportLayout_RequestImport(string fileContent)
+        {
+            if (this.RequestImport != null)
+                this.RequestImport.Invoke(fileContent);
         }
     }
 

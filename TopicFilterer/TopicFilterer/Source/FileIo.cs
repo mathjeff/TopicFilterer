@@ -1,4 +1,7 @@
 ﻿using PCLStorage;
+using Plugin.FilePicker;
+using Plugin.FilePicker.Abstractions;
+using Plugin.Permissions.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +10,7 @@ using System.Threading.Tasks;
 namespace TopicFilterer
 {
     // an InternalFileIo does reading and writing to files that are stored with the application
-    class FileIo
+    class InternalFileIo
     {
         #region Public Member Functions
         public Boolean FileExists(string fileName)
@@ -111,6 +114,49 @@ namespace TopicFilterer
             System.Diagnostics.Debug.WriteLine("From file " + fileName + ", read " + content.Length + " characters ending with: " + suffix);
             return content;
         }
+
         #endregion
+
+    }
+
+    // a PublicFileIo does reading and writing of files in a shared location
+    // This is used for things like data import and export
+    public class PublicFileIo
+    {
+        // saves text to a file where the user can do something with it
+        public async Task<bool> ExportFile(string fileName, string content)
+        {
+            IFilePicker filePicker = CrossFilePicker.Current;
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(content);
+
+            Stream stream = new MemoryStream(bytes);
+            Func<Stream> streamFunc = (() => stream);
+
+            FileData fileData = new FileData(".", fileName, streamFunc);
+            fileData.FileName = fileName;
+
+            Permission[] permissions = new Permission[] { Permission.Storage };
+            Dictionary<Permission, PermissionStatus> status = await Plugin.Permissions.CrossPermissions.Current.RequestPermissionsAsync(permissions);
+
+            // print statuses for debugging
+            System.Diagnostics.Debug.WriteLine("Got status for " + status.Count + " statuses ");
+            foreach (Permission permission in status.Keys)
+            {
+                System.Diagnostics.Debug.WriteLine("Permissions[" + permission + "] = " + status[permission]);
+            }
+
+            // save file
+            Task<bool> task = Task.Run(async () => await filePicker.SaveFile(fileData));
+            bool result = task.Result;
+            System.Diagnostics.Debug.WriteLine("Export status: " + result);
+            return result;
+        }
+
+        // asks the user to choose a file, asynchronously
+        public async Task<FileData> PromptUserForFile()
+        {
+            IFilePicker filePicker = CrossFilePicker.Current;
+            return await filePicker.PickFile();
+        }
     }
 }

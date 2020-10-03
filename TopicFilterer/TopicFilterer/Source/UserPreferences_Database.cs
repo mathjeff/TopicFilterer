@@ -16,6 +16,12 @@ namespace TopicFilterer
         public UserPreferences_Database()
         {
         }
+        public void CopyFrom(UserPreferences_Database other)
+        {
+            this.FeedUrls = other.FeedUrls;
+            this.ScoringRules = other.ScoringRules;
+
+        }
         public List<String> FeedUrls
         {
             get

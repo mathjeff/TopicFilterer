@@ -33,7 +33,24 @@ namespace TopicFilterer
 
             this.loadPostDatabase();
             this.loadPreferences();
-            this.preferencesLayout = CustomizePreferences_Layout.New(this.userPreferences_database, this.LayoutStack);
+            this.setupRulesScreen();
+        }
+
+        private void setupRulesScreen()
+        {
+            CustomizePreferences_Layout customizeLayout = new CustomizePreferences_Layout(this.userPreferences_database, this.LayoutStack);
+            customizeLayout.RequestImport += CustomizeLayout_RequestImport;
+            this.preferencesLayout = customizeLayout;
+        }
+
+        private void CustomizeLayout_RequestImport(string text)
+        {
+            UserPreferences_Database newDb = this.textConverter.ParseUserPreferences(text);
+            this.userPreferences_database.CopyFrom(newDb);
+            this.savePreferences();
+            this.LayoutStack.RemoveLayout();
+            this.LayoutStack.RemoveLayout();
+            this.setupRulesScreen();
         }
 
         private void CustomizeButton_Clicked(object sender, EventArgs e)
@@ -45,11 +62,16 @@ namespace TopicFilterer
         {
             if (layout == this.preferencesLayout)
             {
-                string serialized = (new TextConverter()).ConvertToString(this.userPreferences_database);
-                this.fileIo.EraseFileAndWriteContent(this.userPreferences_filePath, serialized);
+                this.savePreferences();
                 return;
             }
             throw new Exception("Unrecognized layout " + layout);
+        }
+
+        private void savePreferences()
+        {
+            string serialized = this.textConverter.ConvertToString(this.userPreferences_database);
+            this.fileIo.EraseFileAndWriteContent(this.userPreferences_filePath, serialized);
         }
 
         private void StartButton_Clicked(object sender, EventArgs e)
@@ -589,7 +611,7 @@ namespace TopicFilterer
 
         private ViewManager viewManager;
         private LayoutStack LayoutStack = new LayoutStack(true);
-        private FileIo fileIo = new FileIo();
+        private InternalFileIo fileIo = new InternalFileIo();
         private string postDatabase_filePath = "posts.txt";
         private string userPreferences_filePath = "preferences.txt";
         private PostInteraction_Database postDatabase = new PostInteraction_Database();
@@ -603,5 +625,6 @@ namespace TopicFilterer
         private TextblockLayout cannotUpdate_layout;
         private UserPreferences_Database userPreferences_database = new UserPreferences_Database();
         private LayoutChoice_Set preferencesLayout;
+        TextConverter textConverter = new TextConverter();
     }
 }
