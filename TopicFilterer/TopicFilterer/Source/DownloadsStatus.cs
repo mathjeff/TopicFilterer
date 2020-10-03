@@ -14,5 +14,6 @@ namespace TopicFilterer
         public int NumUrlsDownloadedButNotShown;
         public int NumUrlsLeftToDownload;
         public int NumToDownload;
+        public int NumFailed;
     }
 }

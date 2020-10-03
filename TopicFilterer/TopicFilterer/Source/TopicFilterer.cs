@@ -154,6 +154,7 @@ namespace TopicFilterer
 
             LayoutChoice_Set scrollLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
             this.downloadsStatus.NumUrlsDownloadedButNotShown = 0;
+            this.downloadsStatus.NumFailed = 0;
             this.update_numCompletedDownloads_status();
 
             this.resultsLayout.SubLayout = scrollLayout;
@@ -492,16 +493,24 @@ namespace TopicFilterer
             this.onReceivedData(text);
             this.downloadNextUrl();
         }
-        private void onReceivedData(String text)
+        private void onReceivedData(string text)
         {
             System.Diagnostics.Debug.WriteLine("onRecievedData");
             this.downloadsStatus.NumUrlsLeftToDownload--;
             if (text != null)
             {
-                this.downloadsStatus.NumUrlsDownloadedButNotShown++;
-                List<Post> posts = this.parse(text);
-                List<AnalyzedPost> analyzedPosts = this.analyzePosts(posts);
-                this.analyzedPosts.AddRange(analyzedPosts);
+                try
+                {
+                    List<Post> posts = this.parse(text);
+                    List<AnalyzedPost> analyzedPosts = this.analyzePosts(posts);
+                    this.analyzedPosts.AddRange(analyzedPosts);
+                    this.downloadsStatus.NumUrlsDownloadedButNotShown++;
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Error downloading data: " + e);
+                    this.downloadsStatus.NumFailed++;
+                }
             }
             this.update_numCompletedDownloads_status();
         }
@@ -523,6 +532,8 @@ namespace TopicFilterer
                     message = "" + this.downloadsStatus.NumUrlsLeftToDownload + " urls left to download; " + this.downloadsStatus.NumUrlsDownloadedButNotShown + " new urls to show";
                 }
             }
+            if (this.downloadsStatus.NumFailed > 0)
+                message += " (" + this.downloadsStatus.NumFailed + " failed)";
             System.Diagnostics.Debug.WriteLine("NumCompletedDownloads status message: '" + message + "'");
 
             if (this.downloadsStatus.NumUrlsDownloadedButNotShown > 0)
