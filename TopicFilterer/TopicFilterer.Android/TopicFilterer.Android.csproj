@@ -59,7 +59,7 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
     <PackageReference Include="Xamarin.Android.Support.Core.Utils" Version="28.0.0.3" />
     <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
@@ -93,6 +93,14 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <ProjectReference Include="..\..\deps\VisiPlacer\VisiPlacer.Android\VisiPlacer.Android.csproj">
+      <Project>{5911e1a9-9c98-42ba-9878-90ed3f946e57}</Project>
+      <Name>VisiPlacer.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\deps\VisiPlacer\VisiPlacer\VisiPlacer.csproj">
+      <Project>{7b9efb80-514d-49f6-b580-cf32c79c80a1}</Project>
+      <Name>VisiPlacer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopicFilterer\TopicFilterer.csproj">
       <Project>{FBF845C6-B174-49E6-918A-76306E1F1712}</Project>
       <Name>TopicFilterer</Name>

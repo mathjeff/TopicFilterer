@@ -143,11 +143,15 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9"/>
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.1.9" />
     <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\deps\VisiPlacer\VisiPlacer.UWP\VisiPlacer.UWP.csproj">
+      <Project>{9323f653-bb21-4967-9341-88dbad2728c3}</Project>
+      <Name>VisiPlacer.UWP</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopicFilterer\TopicFilterer.csproj">
       <Project>{FBF845C6-B174-49E6-918A-76306E1F1712}</Project>
       <Name>TopicFilterer</Name>

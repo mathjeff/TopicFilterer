@@ -21,7 +21,6 @@ namespace TopicFilterer.View
             foreach (AnalyzedString component in post.TitleComponents)
             {
                 Label label = new Label();
-                TextblockLayout textBlockLayout = new TextblockLayout(label, 16, false, true);
                 if (component.Score > 0)
                 {
                     label.TextColor = Color.Green;
@@ -37,8 +36,9 @@ namespace TopicFilterer.View
                         label.TextColor = Color.White;
                     }
                 }
-                textBlockLayout.setText(component.Text);
                 label.BackgroundColor = Color.Black;
+                TextblockLayout textBlockLayout = new TextblockLayout(label, 16, false, true);
+                textBlockLayout.setText(component.Text);
                 builder.AddLayout(textBlockLayout);
             }
 

@@ -48,7 +48,7 @@
     <CodesignKey>iPhone Developer</CodesignKey>
     <MtouchDebug>true</MtouchDebug>
     <CodesignProvision>iOS Team Provisioning Profile: *</CodesignProvision>
-    <CodesignKey>Apple Development: Jeffry Gaston (R4Z44WB24C)</CodesignKey> 
+    <CodesignKey>Apple Development: Jeffry Gaston (R4Z44WB24C)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
@@ -127,11 +127,21 @@
     <Reference Include="System.Numerics.Vectors" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="4.5.0.495" />
+    <PackageReference Include="Xamarin.Forms" Version="4.5.0.617" />
     <PackageReference Include="Xamarin.Essentials" Version="1.2.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
+    <ProjectReference Include="..\..\deps\VisiPlacer\VisiPlacer.iOS\VisiPlacer.iOS.csproj">
+      <Project>{de461a19-e352-4a79-855b-4fcc38da6bb6}</Project>
+      <Name>VisiPlacer.iOS</Name>
+      <IsAppExtension>false</IsAppExtension>
+      <IsWatchApp>false</IsWatchApp>
+    </ProjectReference>
+    <ProjectReference Include="..\..\deps\VisiPlacer\VisiPlacer\VisiPlacer.csproj">
+      <Project>{7b9efb80-514d-49f6-b580-cf32c79c80a1}</Project>
+      <Name>VisiPlacer</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TopicFilterer\TopicFilterer.csproj">
       <Project>{FBF845C6-B174-49E6-918A-76306E1F1712}</Project>
       <Name>TopicFilterer</Name>

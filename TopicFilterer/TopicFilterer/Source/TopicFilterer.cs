@@ -14,7 +14,11 @@ namespace TopicFilterer
     {
         public TopicFilterer(ContentView contentView)
         {
-            ViewManager viewManager = new ViewManager(contentView, null);
+            VisualDefaults_Builder defaultsBuilder = new VisualDefaults_Builder();
+            defaultsBuilder.UneditableText_Color(Color.White);
+            defaultsBuilder.UneditableText_Background(Color.Black);
+
+            ViewManager viewManager = new ViewManager(contentView, null, defaultsBuilder.Build());
 
             Button customizeButton = new Button();
             customizeButton.Clicked += CustomizeButton_Clicked;

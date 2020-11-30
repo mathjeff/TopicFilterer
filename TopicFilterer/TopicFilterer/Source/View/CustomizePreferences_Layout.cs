@@ -390,19 +390,18 @@ namespace TopicFilterer.View
 
         private void updateLayout()
         {
-            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
+            Vertical_GridLayout_Builder largeFont_builder = new Vertical_GridLayout_Builder();
+            Vertical_GridLayout_Builder smallFont_builder = new Vertical_GridLayout_Builder();
             foreach (string url in this.FeedUrls)
             {
                 Button feedButton = new Button();
                 feedButton.Clicked += FeedButton_Clicked;
-                ButtonLayout buttonLayout = new ButtonLayout(feedButton, url);
-                //TextblockLayout layout = new TextblockLayout(url);
-                //layout.setTextColor(Color.White);
-                //layout.setBackgroundColor(Color.Black);
-                builder.AddLayout(buttonLayout);
+                largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true, false, false, true));
+                smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, false, false, true));
             }
-            builder.AddLayout(this.newFeedsLayout);
-            this.SubLayout = builder.BuildAnyLayout();
+            largeFont_builder.AddLayout(this.newFeedsLayout);
+            smallFont_builder.AddLayout(this.newFeedsLayout);
+            this.SubLayout = ScrollLayout.New(new LayoutUnion(largeFont_builder.Build(), smallFont_builder.Build()));
         }
 
         private void FeedButton_Clicked(object sender, EventArgs e)
