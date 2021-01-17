@@ -398,8 +398,8 @@ namespace TopicFilterer.View
             {
                 Button feedButton = new Button();
                 feedButton.Clicked += FeedButton_Clicked;
-                largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true));
-                smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, true));
+                largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true, false, false, true));
+                smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, false, false, true));
             }
             largeFont_builder.AddLayout(this.newFeedsLayout);
             smallFont_builder.AddLayout(this.newFeedsLayout);
