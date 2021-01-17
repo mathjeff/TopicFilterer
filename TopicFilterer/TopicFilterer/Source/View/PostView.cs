@@ -10,10 +10,9 @@ namespace TopicFilterer.View
     {
         public event ClickedHandler PostClicked;
         public delegate void ClickedHandler(PostInteraction post);
-        public PostView(PostInteraction interaction)
+        public PostView(AnalyzedPost post)
         {
-            this.interaction = interaction;
-            AnalyzedPost post = interaction.Post;
+            this.post = post;
             Button button = new Button();
 
             Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
@@ -42,7 +41,7 @@ namespace TopicFilterer.View
                 builder.AddLayout(textBlockLayout);
             }
 
-            this.linkLayout = new TextblockLayout(post.Post.Source, 16, false, true);
+            this.linkLayout = new TextblockLayout(post.Interaction.Post.Source, 16, false, true);
             this.linkLayout.setBackgroundColor(Color.Black);
             this.updateLinkColor();
             
@@ -56,7 +55,7 @@ namespace TopicFilterer.View
 
         private void updateLinkColor()
         {
-            if (this.interaction.Visited)
+            if (this.post.Interaction.Visited)
             {
                 this.linkLayout.setTextColor(Color.Orange);
             }
@@ -68,18 +67,18 @@ namespace TopicFilterer.View
 
         private void Button_Clicked(object sender, EventArgs e)
         {
-            this.interaction.Visited = true;
+            this.post.Interaction.Visited = true;
             this.updateLinkColor();
-            string source = this.interaction.Post.Post.Source;
+            string source = this.post.Interaction.Post.Source;
             if (source != null && null != "")
             {
                 if (this.PostClicked != null)
                 {
-                    this.PostClicked.Invoke(this.interaction);
+                    this.PostClicked.Invoke(this.post.Interaction);
                 }
             }
         }
-        PostInteraction interaction;
+        AnalyzedPost post;
         TextblockLayout linkLayout;
     }
 }

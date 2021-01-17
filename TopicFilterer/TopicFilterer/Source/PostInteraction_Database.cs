@@ -23,9 +23,9 @@ namespace TopicFilterer
         {
         }
 
-        public PostInteraction Get(AnalyzedPost post)
+        public PostInteraction Get(Post post)
         {
-            string key = post.Post.Source;
+            string key = post.Source;
             if (this.keyedInteractions.ContainsKey(key))
             {
                 PostInteraction interaction = this.keyedInteractions[key];
@@ -44,7 +44,7 @@ namespace TopicFilterer
         public void Add(PostInteraction interaction)
         {
             this.orderedInteractions.Add(interaction);
-            this.keyedInteractions[interaction.Post.Post.Source] = interaction;
+            this.keyedInteractions[interaction.Post.Source] = interaction;
         }
         public void AddPosts(IEnumerable<PostInteraction> posts)
         {
@@ -61,7 +61,7 @@ namespace TopicFilterer
             List<PostInteraction> itemsToRemove = this.orderedInteractions.GetRange(0, numToRemove);
             foreach (PostInteraction removal in itemsToRemove)
             {
-                this.keyedInteractions.Remove(removal.Post.Post.Source);
+                this.keyedInteractions.Remove(removal.Post.Source);
             }
             this.orderedInteractions = this.orderedInteractions.GetRange(numToRemove, size);
         }

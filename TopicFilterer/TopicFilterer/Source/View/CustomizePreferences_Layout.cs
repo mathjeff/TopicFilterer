@@ -158,9 +158,11 @@ namespace TopicFilterer.View
             this.scoreBox = new Editor();
             this.scoreBox.TextColor = Color.White;
             this.scoreBox.BackgroundColor = Color.Black;
+            TextboxLayout scoreBoxLayout = new TextboxLayout(this.scoreBox);
+            scoreBoxLayout.SetBackgroundColor(Color.White);
             LayoutChoice_Set scoreLayout = new Horizontal_GridLayout_Builder().Uniform()
                 .AddLayout(new TextblockLayout("Score:"))
-                .AddLayout(new TextboxLayout(this.scoreBox)).BuildAnyLayout();
+                .AddLayout(scoreBoxLayout).BuildAnyLayout();
 
             return new Vertical_GridLayout_Builder().Uniform()
                 .AddLayout(parensLayout).AddLayout(wordLayout).AddLayout(joinsLayout).AddLayout(scoreLayout)
@@ -396,8 +398,8 @@ namespace TopicFilterer.View
             {
                 Button feedButton = new Button();
                 feedButton.Clicked += FeedButton_Clicked;
-                largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true, false, false, true));
-                smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, false, false, true));
+                largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true));
+                smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, true));
             }
             largeFont_builder.AddLayout(this.newFeedsLayout);
             smallFont_builder.AddLayout(this.newFeedsLayout);

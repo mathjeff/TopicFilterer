@@ -17,13 +17,13 @@ namespace TopicFilterer
 
     public class AnalyzedPost
     {
-        public AnalyzedPost(Post Post, double Score, List<AnalyzedString> analyzedTitle)
+        public AnalyzedPost(PostInteraction Interaction, double Score, List<AnalyzedString> analyzedTitle)
         {
-            this.Post = Post;
+            this.Interaction = Interaction;
             this.Score = Score;
             this.TitleComponents = analyzedTitle;
         }
-        public Post Post;
+        public PostInteraction Interaction;
         public double Score;
         public List<AnalyzedString> TitleComponents;
     }

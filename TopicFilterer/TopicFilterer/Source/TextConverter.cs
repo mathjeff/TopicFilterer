@@ -38,7 +38,7 @@ namespace TopicFilterer
         public string ConvertToString(PostInteraction post)
         {
             Dictionary<string, string> properties = new Dictionary<string, string>();
-            properties[this.PostUrl_Tag] = this.XmlEscape(post.Post.Post.Source);
+            properties[this.PostUrl_Tag] = this.XmlEscape(post.Post.Source);
             if (post.Visited)
                 properties[this.PostVisited_Tag] = this.ConvertToStringBody(true);
             return this.ConvertToString(properties, PostTag);
@@ -164,12 +164,12 @@ namespace TopicFilterer
         public PostInteraction ReadInteraction(XmlNode nodeRepresentation)
         {
             PostInteraction interaction = new PostInteraction();
-            interaction.Post = new AnalyzedPost(new Post(), 0, new List<AnalyzedString>());
+            interaction.Post = new Post();
             foreach (XmlNode child in nodeRepresentation.ChildNodes)
             {
                 if (child.Name == this.PostUrl_Tag)
                 {
-                    interaction.Post.Post.Source = this.ReadText(child);
+                    interaction.Post.Source = this.ReadText(child);
                     continue;
                 }
                 if (child.Name == this.PostVisited_Tag)

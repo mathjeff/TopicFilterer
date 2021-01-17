@@ -9,12 +9,12 @@ namespace TopicFilterer
         public PostInteraction()
         {
         }
-        public PostInteraction(AnalyzedPost post, bool visited)
+        public PostInteraction(Post post, bool visited)
         {
             this.Post = post;
             this.Visited = visited;
         }
-        public AnalyzedPost Post;
+        public Post Post;
         public bool Visited;
             
     }

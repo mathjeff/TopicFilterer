@@ -150,8 +150,7 @@ namespace TopicFilterer
 
                     previousScore = thisScore;
                 }
-                PostInteraction interaction = this.postDatabase.Get(scoredPost);
-                PostView postView = new PostView(interaction);
+                PostView postView = new PostView(scoredPost);
                 postView.PostClicked += PostView_PostClicked;
                 gridBuilder.AddLayout(postView);
             }
@@ -167,7 +166,7 @@ namespace TopicFilterer
         private void PostView_PostClicked(PostInteraction interaction)
         {
             this.savePostDatabase();
-            Device.OpenUri(new Uri(interaction.Post.Post.Source));
+            Device.OpenUri(new Uri(interaction.Post.Source));
         }
 
         private List<AnalyzedPost> analyzePosts(List<Post> posts)
@@ -208,7 +207,13 @@ namespace TopicFilterer
                     titleComponents.RemoveAt(i);
                 }
             }
-            return new AnalyzedPost(post, score, titleComponents);
+
+
+            PostInteraction interaction = this.postDatabase.Get(post);
+            if (interaction.Visited)
+                score -= 1;
+
+            return new AnalyzedPost(interaction, score, titleComponents);
         }
         private List<String> splitIntoWords(string text)
         {
