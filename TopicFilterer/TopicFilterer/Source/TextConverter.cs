@@ -52,7 +52,7 @@ namespace TopicFilterer
         }
         public string ConvertToString(TextPredicate predicate)
         {
-            ContainsWord_Predicate contains = predicate as ContainsWord_Predicate;
+            ContainsPhrase_Predicate contains = predicate as ContainsPhrase_Predicate;
             if (contains != null)
                 return this.ConvertToString(contains);
 
@@ -66,9 +66,9 @@ namespace TopicFilterer
 
             throw new Exception("Unrecognized predicate: " + predicate);
         }
-        public string ConvertToString(ContainsWord_Predicate predicate)
+        public string ConvertToString(ContainsPhrase_Predicate predicate)
         {
-            return this.ConvertToString(predicate.Text, this.ContainsWord_Tag);
+            return this.ConvertToString(predicate.Text, this.ContainsPhrase_Tag);
         }
         public string ConvertToString(AndPredicate predicate)
         {
@@ -206,18 +206,18 @@ namespace TopicFilterer
         }
         public TextPredicate ReadTextPredicate(XmlNode nodeRepresentation)
         {
-            if (nodeRepresentation.Name == this.ContainsWord_Tag)
-                return this.Read_ContainsWord_Predicate(nodeRepresentation);
+            if (nodeRepresentation.Name == this.ContainsPhrase_Tag)
+                return this.Read_ContainsPhrase_Predicate(nodeRepresentation);
             if (nodeRepresentation.Name == this.And_Tag)
                 return this.Read_AndPredicate(nodeRepresentation);
             if (nodeRepresentation.Name == this.Or_Tag)
                 return this.Read_OrPredicate(nodeRepresentation);
             throw new Exception("Unrecognized text predicate " + nodeRepresentation.Name);
         }
-        public ContainsWord_Predicate Read_ContainsWord_Predicate(XmlNode nodeRepresentation)
+        public ContainsPhrase_Predicate Read_ContainsPhrase_Predicate(XmlNode nodeRepresentation)
         {
             string text = this.ReadText(nodeRepresentation);
-            return new ContainsWord_Predicate(text);
+            return new ContainsPhrase_Predicate(text);
         }
         public AndPredicate Read_AndPredicate(XmlNode nodeRepresentation)
         {
@@ -362,10 +362,11 @@ namespace TopicFilterer
                 return "or";
             }
         }
-        public string ContainsWord_Tag
+        public string ContainsPhrase_Tag
         {
             get
             {
+                // kept as this value for backwards compatibility
                 return "containsWord";
             }
         }

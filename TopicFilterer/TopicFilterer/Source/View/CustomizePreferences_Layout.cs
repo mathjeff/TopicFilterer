@@ -143,7 +143,7 @@ namespace TopicFilterer.View
             this.newWord_box = new Editor();
 
             LayoutChoice_Set wordLayout = new Horizontal_GridLayout_Builder().Uniform()
-                .AddLayout(new ButtonLayout(textButton, "Contains Word"))
+                .AddLayout(new ButtonLayout(textButton, "Contains Phrase"))
                 .AddLayout(new TextboxLayout(this.newWord_box)).BuildAnyLayout();
 
             Button andButton = new Button();
@@ -267,7 +267,7 @@ namespace TopicFilterer.View
             string text = this.newWord_box.Text;
             if (text != null && text != "")
             {
-                ContainsWord_Predicate word = new ContainsWord_Predicate(text);
+                ContainsPhrase_Predicate word = new ContainsPhrase_Predicate(text);
                 this.newWord_box.Text = "";
                 this.addChild(word);
                 this.updateLayout();

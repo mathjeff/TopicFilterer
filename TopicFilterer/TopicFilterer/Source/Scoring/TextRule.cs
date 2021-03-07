@@ -15,17 +15,31 @@ namespace TopicFilterer.Scoring
         string builderText();
     }
 
-    public class ContainsWord_Predicate : TextPredicate
+    public class ContainsPhrase_Predicate : TextPredicate
     {
-        public ContainsWord_Predicate(string word)
+        public ContainsPhrase_Predicate(string word)
         {
             this.word = word.ToLower();
         }
+        // checks whether our matcher word (or words) can be found (contiguously) in the text
         public bool matches(string text)
         {
-            char[] wordSeparators = new char[] { ' ', ',', '.', '!', '?', '-' };
-            List<String> orderedWords = new List<string>(text.ToLower().Split(wordSeparators));
-            return orderedWords.Contains(this.word);
+            if (this.word.Length < 1)
+                return false;
+            for (int i = 0; i <= text.Length - this.word.Length; i++)
+            {
+                // it only counts if there is a word break before this position
+                if (!isBreak(text, i - 1))
+                    continue;
+                // it only counts if there is a word break after this position
+                if (!isBreak(text, i + this.word.Length))
+                    continue;
+                // now check that the contents between these breaks is the word we're looking for
+                if (text.Substring(i, this.word.Length).ToLower() != this.word)
+                    continue;
+                return true;
+            }
+            return false;
         }
         public string Text
         {
@@ -42,7 +56,18 @@ namespace TopicFilterer.Scoring
         {
             return this.ToString();
         }
+        // tells whether this position contains is a break between words
+        private bool isBreak(string text, int position)
+        {
+            if (position == -1 || position == text.Length)
+            {
+                return true;
+            }
+            char c = text[position];
+            return wordSeparators.Contains(c);
+        }
         private string word;
+        private static HashSet<char> wordSeparators = new HashSet<char>() { ' ', ',', '.', '!', '?', '-' };
     }
 
     public class AndPredicate : TextPredicate
