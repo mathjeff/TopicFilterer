@@ -146,6 +146,8 @@ namespace TopicFilterer.View
                 .AddLayout(new ButtonLayout(textButton, "Contains Phrase"))
                 .AddLayout(new TextboxLayout(this.newWord_box)).BuildAnyLayout();
 
+            Button notButton = new Button();
+            notButton.Clicked += NotButton_Clicked;
             Button andButton = new Button();
             andButton.Clicked += AndButton_Clicked;
             Button orButton = new Button();
@@ -153,7 +155,8 @@ namespace TopicFilterer.View
 
             LayoutChoice_Set joinsLayout = new Horizontal_GridLayout_Builder().Uniform()
                 .AddLayout(new ButtonLayout(andButton, ") And"))
-                .AddLayout(new ButtonLayout(orButton, ") Or")).BuildAnyLayout();
+                .AddLayout(new ButtonLayout(orButton, ") Or"))
+                .AddLayout(new ButtonLayout(notButton, "Not (")).BuildAnyLayout();
 
             this.scoreBox = new Editor();
             this.scoreBox.TextColor = Color.White;
@@ -167,6 +170,13 @@ namespace TopicFilterer.View
             return new Vertical_GridLayout_Builder().Uniform()
                 .AddLayout(parensLayout).AddLayout(wordLayout).AddLayout(joinsLayout).AddLayout(scoreLayout)
                 .BuildAnyLayout();
+        }
+
+        private void NotButton_Clicked(object sender, EventArgs e)
+        {
+            NotPredicate not = new NotPredicate();
+            this.openPredicates.Add(not);
+            this.updateLayout();
         }
 
         public TextRule GetRule()
@@ -307,6 +317,13 @@ namespace TopicFilterer.View
             {
                 // we have a pending 'and'; add it here
                 and.AddChild(predicate);
+                return;
+            }
+            NotPredicate not = last as NotPredicate;
+            if (not != null)
+            {
+                // we have a pending 'not'; add it here
+                not.Child = predicate;
                 return;
             }
             if (last == null)

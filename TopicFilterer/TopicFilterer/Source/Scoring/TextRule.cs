@@ -202,6 +202,49 @@ namespace TopicFilterer.Scoring
         private List<TextPredicate> components;
     }
 
+    public class NotPredicate : TextPredicate
+    {
+        public NotPredicate()
+        {
+        }
+        public NotPredicate(TextPredicate child)
+        {
+            this.child = child;
+        }
+        public bool matches(string text)
+        {
+            if (this.child == null)
+                return false;
+            return (!this.child.matches(text));
+        }
+        public TextPredicate Child
+        {
+            get
+            {
+                return this.child;
+            }
+            set
+            {
+                this.child = value;
+            }
+        }
+        public override string ToString()
+        {
+            if (this.child == null)
+                return "not()";
+            return "not(" + this.child.ToString() + ")";
+        }
+
+        public string builderText()
+        {
+            if (this.child == null)
+                return "(not";
+            return "(not " + this.child.builderText() + ")";
+        }
+        private TextPredicate child;
+    }
+
+
     public class TextRule
     {
         public TextRule(TextPredicate criteria, double score)
@@ -244,5 +287,4 @@ namespace TopicFilterer.Scoring
         private TextPredicate criteria;
         private double score;
     }
-
 }

@@ -64,6 +64,10 @@ namespace TopicFilterer
             if (or != null)
                 return this.ConvertToString(or);
 
+            NotPredicate not = predicate as NotPredicate;
+            if (not != null)
+                return this.ConvertToString(not);
+
             throw new Exception("Unrecognized predicate: " + predicate);
         }
         public string ConvertToString(ContainsPhrase_Predicate predicate)
@@ -87,6 +91,13 @@ namespace TopicFilterer
                 content.Append(this.ConvertToString(child));
             }
             return this.ConvertToString(content.ToString(), this.Or_Tag);
+        }
+        public string ConvertToString(NotPredicate predicate)
+        {
+            StringBuilder content = new StringBuilder();
+            if (predicate.Child != null)
+                content.Append(this.ConvertToString(predicate.Child));
+            return this.ConvertToString(content.ToString(), this.Not_Tag);
         }
         public string ConvertToString(Dictionary<string, string> properties, string objectName)
         {
@@ -212,6 +223,8 @@ namespace TopicFilterer
                 return this.Read_AndPredicate(nodeRepresentation);
             if (nodeRepresentation.Name == this.Or_Tag)
                 return this.Read_OrPredicate(nodeRepresentation);
+            if (nodeRepresentation.Name == this.Not_Tag)
+                return this.Read_NotPredicate(nodeRepresentation);
             throw new Exception("Unrecognized text predicate " + nodeRepresentation.Name);
         }
         public ContainsPhrase_Predicate Read_ContainsPhrase_Predicate(XmlNode nodeRepresentation)
@@ -236,6 +249,16 @@ namespace TopicFilterer
             {
                 TextPredicate child = this.ReadTextPredicate(childNode);
                 predicate.AddChild(child);
+            }
+            return predicate;
+        }
+        public NotPredicate Read_NotPredicate(XmlNode nodeRepresentation)
+        {
+            NotPredicate predicate = new NotPredicate();
+            foreach (XmlNode childNode in nodeRepresentation.ChildNodes)
+            {
+                TextPredicate child = this.ReadTextPredicate(childNode);
+                predicate.Child = child;;
             }
             return predicate;
         }
@@ -360,6 +383,13 @@ namespace TopicFilterer
             get
             {
                 return "or";
+            }
+        }
+        public string Not_Tag
+        {
+            get
+            {
+                return "not";
             }
         }
         public string ContainsPhrase_Tag
