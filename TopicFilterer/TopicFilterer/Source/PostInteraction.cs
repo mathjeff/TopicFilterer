@@ -16,6 +16,6 @@ namespace TopicFilterer
         }
         public Post Post;
         public bool Visited;
-            
+        public bool Starred;
     }
 }

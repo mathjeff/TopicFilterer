@@ -41,6 +41,8 @@ namespace TopicFilterer
             properties[this.PostUrl_Tag] = this.XmlEscape(post.Post.Source);
             if (post.Visited)
                 properties[this.PostVisited_Tag] = this.ConvertToStringBody(true);
+            if (post.Starred)
+                properties[this.PostStarred_Tag] = this.ConvertToStringBody(true);
             return this.ConvertToString(properties, PostTag);
         }
         public string ConvertToString(TextRule rule)
@@ -188,6 +190,11 @@ namespace TopicFilterer
                     interaction.Visited = this.ReadBool(child);
                     continue;
                 }
+                if (child.Name == this.PostStarred_Tag)
+                {
+                    interaction.Starred = this.ReadBool(child);
+                    continue;
+                }
             }
             return interaction;
         }
@@ -330,6 +337,13 @@ namespace TopicFilterer
             get
             {
                 return "visited";
+            }
+        }
+        public string PostStarred_Tag
+        {
+            get
+            {
+                return "starred";
             }
         }
         public string FeedTag

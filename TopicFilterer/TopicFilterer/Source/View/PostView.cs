@@ -10,12 +10,13 @@ namespace TopicFilterer.View
     {
         public event ClickedHandler PostClicked;
         public delegate void ClickedHandler(PostInteraction post);
+        public event StarredHandler PostStarred;
+        public delegate void StarredHandler(PostInteraction post);
         public PostView(AnalyzedPost post)
         {
             this.post = post;
-            Button button = new Button();
-
-            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
+            Vertical_GridLayout_Builder mainBuilder = new Vertical_GridLayout_Builder();
+            Vertical_GridLayout_Builder titleBuilder = new Vertical_GridLayout_Builder();
             // post title
             foreach (AnalyzedString component in post.TitleComponents)
             {
@@ -38,34 +39,55 @@ namespace TopicFilterer.View
                 label.BackgroundColor = Color.Black;
                 TextblockLayout textBlockLayout = new TextblockLayout(label, 16, false, true);
                 textBlockLayout.setText(component.Text);
-                builder.AddLayout(textBlockLayout);
+                titleBuilder.AddLayout(textBlockLayout);
             }
+            this.starButton = new Button();
+            this.updateStarButton();
+            this.starButton.Clicked += SaveButton_Clicked;
+
+            GridLayout topGrid = GridLayout.New(new BoundProperty_List(1), BoundProperty_List.WithRatios(new List<double>() { 5, 1 }), LayoutScore.Zero);
+            topGrid.AddLayout(titleBuilder.BuildAnyLayout());
+            topGrid.AddLayout(new ButtonLayout(this.starButton));
+            mainBuilder.AddLayout(topGrid);
 
             this.linkLayout = new TextblockLayout(post.Interaction.Post.Source, 16, false, true);
             this.linkLayout.setBackgroundColor(Color.Black);
             this.updateLinkColor();
-            
-            builder.AddLayout(linkLayout);
-            builder.AddLayout(new ButtonLayout(button, "Open", 16));
+            mainBuilder.AddLayout(this.linkLayout);
 
-            button.Clicked += Button_Clicked;
+            Button openButton = new Button();
+            mainBuilder.AddLayout(new ButtonLayout(openButton, "Open", 16));
+            openButton.Clicked += OpenButton_Clicked;
 
-            this.SubLayout = builder.BuildAnyLayout();
+            this.SubLayout = mainBuilder.BuildAnyLayout();
+        }
+
+        private void SaveButton_Clicked(object sender, EventArgs e)
+        {
+            this.post.Interaction.Starred = !this.post.Interaction.Starred;
+            this.updateStarButton();
+            if (this.PostStarred != null)
+            {
+                this.PostStarred.Invoke(this.post.Interaction);
+            }
+        }
+        private void updateStarButton()
+        {
+            if (this.post.Interaction.Starred)
+                this.starButton.Text = "Unstar";
+            else
+                this.starButton.Text = "Star";
         }
 
         private void updateLinkColor()
         {
             if (this.post.Interaction.Visited)
-            {
                 this.linkLayout.setTextColor(Color.Orange);
-            }
             else
-            {
                 this.linkLayout.setTextColor(Color.White);
-            }
         }
 
-        private void Button_Clicked(object sender, EventArgs e)
+        private void OpenButton_Clicked(object sender, EventArgs e)
         {
             this.post.Interaction.Visited = true;
             this.updateLinkColor();
@@ -80,5 +102,6 @@ namespace TopicFilterer.View
         }
         AnalyzedPost post;
         TextblockLayout linkLayout;
+        Button starButton;
     }
 }

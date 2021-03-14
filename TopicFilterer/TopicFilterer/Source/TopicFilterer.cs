@@ -22,15 +22,20 @@ namespace TopicFilterer
 
             Button customizeButton = new Button();
             customizeButton.Clicked += CustomizeButton_Clicked;
-            ButtonLayout customizeButtonLayout = new ButtonLayout(customizeButton, "Customize");
 
             Button startButton = new Button();
             startButton.Clicked += StartButton_Clicked;
-            ButtonLayout startButtonLayout = new ButtonLayout(startButton, "Start");
+
+            Button browseStarred_button = new Button();
+            browseStarred_button.Clicked += BrowseStarred_button_Clicked;
 
             viewManager.SetLayout(this.LayoutStack);
 
-            LayoutChoice_Set startLayout = new Vertical_GridLayout_Builder().AddLayout(customizeButtonLayout).AddLayout(startButtonLayout).Build();
+            LayoutChoice_Set startLayout = new Vertical_GridLayout_Builder()
+                .AddLayout(new ButtonLayout(customizeButton, "Preferences"))
+                .AddLayout(new ButtonLayout(startButton, "Browse Latest"))
+                .AddLayout(new ButtonLayout(browseStarred_button, "Browse Past Favorites"))
+                .Build();
 
             this.LayoutStack.AddLayout(startLayout, "Welcome", -1);
             this.viewManager = viewManager;
@@ -38,6 +43,46 @@ namespace TopicFilterer
             this.loadPostDatabase();
             this.loadPreferences();
             this.setupRulesScreen();
+        }
+
+        private void BrowseStarred_button_Clicked(object sender, EventArgs e)
+        {
+            this.showStarred();
+        }
+        private void showStarred()
+        {
+            this.LayoutStack.AddLayout(this.makeStarredScreen(), "Starred");
+        }
+        private LayoutChoice_Set makeStarredScreen()
+        {
+            List<PostInteraction> starredPosts = this.getStarredPosts();
+            if (starredPosts.Count < 1)
+            {
+                return new TextblockLayout("No starred posts! First browse some new posts and star some of them");
+            }
+            Vertical_GridLayout_Builder builder = new Vertical_GridLayout_Builder();
+            foreach (PostInteraction interaction in starredPosts)
+            {
+                AnalyzedPost analyzed = this.analyzePost(interaction.Post);
+                PostView postView = new PostView(analyzed);
+                postView.PostClicked += PostView_PostClicked;
+                postView.PostStarred += PostView_PostStarred;
+                builder.AddLayout(postView);
+            }
+            return builder.BuildAnyLayout();
+        }
+        private List<PostInteraction> getStarredPosts()
+        {
+            List<PostInteraction> starredPosts = new List<PostInteraction>();
+            foreach (PostInteraction post in this.postDatabase.GetPosts())
+            {
+                if (post.Starred)
+                {
+                    starredPosts.Add(post);
+                }
+            }
+            starredPosts.Reverse();
+            return starredPosts;
         }
 
         private void setupRulesScreen()
@@ -152,6 +197,7 @@ namespace TopicFilterer
                 }
                 PostView postView = new PostView(scoredPost);
                 postView.PostClicked += PostView_PostClicked;
+                postView.PostStarred += PostView_PostStarred;
                 gridBuilder.AddLayout(postView);
             }
 
@@ -161,6 +207,11 @@ namespace TopicFilterer
             this.update_numCompletedDownloads_status();
 
             this.resultsLayout.SubLayout = scrollLayout;
+        }
+
+        private void PostView_PostStarred(PostInteraction post)
+        {
+            this.savePostDatabase();
         }
 
         private void PostView_PostClicked(PostInteraction interaction)
@@ -245,7 +296,7 @@ namespace TopicFilterer
         }
         private void savePostDatabase()
         {
-            this.postDatabase.ShrinkToSize(1000);
+            this.postDatabase.ShrinkToSize(10000);
             string text = this.postDatabase.ToString();
             this.fileIo.EraseFileAndWriteContent(this.postDatabase_filePath, text);
         }
