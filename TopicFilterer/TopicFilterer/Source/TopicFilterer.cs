@@ -177,6 +177,7 @@ namespace TopicFilterer
             gridBuilder.AddLayout(this.downloadStatus_container);
 
             this.sortPosts(posts);
+            posts = this.withoutDuplicateSources(posts);
 
             int maxCountToShow = 30;
             if (posts.Count > maxCountToShow)
@@ -233,6 +234,22 @@ namespace TopicFilterer
         {
             posts.Sort(new ScoredPost_Sorter());
             posts.Reverse();
+        }
+        private List<AnalyzedPost> withoutDuplicateSources(List<AnalyzedPost> posts)
+        {
+            List<AnalyzedPost> results = new List<AnalyzedPost>();
+            HashSet<string> sources = new HashSet<string>();
+            foreach (AnalyzedPost post in posts)
+            {
+                string source = post.Interaction.Post.Source;
+                if (sources.Contains(source))
+                {
+                    continue;
+                }
+                sources.Add(source);
+                results.Add(post);
+            }
+            return results;
         }
 
         private AnalyzedPost analyzePost(Post post)
