@@ -39,6 +39,7 @@ namespace TopicFilterer
         {
             Dictionary<string, string> properties = new Dictionary<string, string>();
             properties[this.PostUrl_Tag] = this.XmlEscape(post.Post.Source);
+            properties[this.PostTitle_Tag] = this.XmlEscape(post.Post.Title);
             if (post.Visited)
                 properties[this.PostVisited_Tag] = this.ConvertToStringBody(true);
             if (post.Starred)
@@ -178,6 +179,7 @@ namespace TopicFilterer
         {
             PostInteraction interaction = new PostInteraction();
             interaction.Post = new Post();
+            interaction.Post.Title = "";
             foreach (XmlNode child in nodeRepresentation.ChildNodes)
             {
                 if (child.Name == this.PostUrl_Tag)
@@ -193,6 +195,11 @@ namespace TopicFilterer
                 if (child.Name == this.PostStarred_Tag)
                 {
                     interaction.Starred = this.ReadBool(child);
+                    continue;
+                }
+                if (child.Name == this.PostTitle_Tag)
+                {
+                    interaction.Post.Title = this.ReadText(child);
                     continue;
                 }
             }
@@ -344,6 +351,13 @@ namespace TopicFilterer
             get
             {
                 return "starred";
+            }
+        }
+        public string PostTitle_Tag
+        {
+            get
+            {
+                return "title";
             }
         }
         public string FeedTag
