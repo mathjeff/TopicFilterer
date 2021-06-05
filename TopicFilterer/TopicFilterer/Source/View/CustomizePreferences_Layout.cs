@@ -418,9 +418,12 @@ namespace TopicFilterer.View
                 largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true, false, false, true));
                 smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, false, false, true));
             }
-            largeFont_builder.AddLayout(this.newFeedsLayout);
-            smallFont_builder.AddLayout(this.newFeedsLayout);
-            this.SubLayout = ScrollLayout.New(new LayoutUnion(largeFont_builder.Build(), smallFont_builder.Build()));
+
+            LayoutChoice_Set topLayout = ScrollLayout.New(new LayoutUnion(largeFont_builder.Build(), smallFont_builder.Build()));
+            this.SubLayout = new Vertical_GridLayout_Builder()
+                .AddLayout(topLayout)
+                .AddLayout(this.newFeedsLayout)
+                .Build();
         }
 
         private void FeedButton_Clicked(object sender, EventArgs e)
