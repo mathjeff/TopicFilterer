@@ -57,13 +57,39 @@ namespace TopicFilterer
         {
             if (this.orderedInteractions.Count <= size)
                 return;
+
             int numToRemove = this.orderedInteractions.Count - size;
-            List<PostInteraction> itemsToRemove = this.orderedInteractions.GetRange(0, numToRemove);
-            foreach (PostInteraction removal in itemsToRemove)
+            List<PostInteraction> newOrderedInteractions = new List<PostInteraction>();
+            Dictionary<string, PostInteraction> newKeyedInteractions = new Dictionary<string, PostInteraction>();
+            int numSkipped = 0;
+
+            for (int i = 0; i < this.orderedInteractions.Count; i++)
             {
-                this.keyedInteractions.Remove(removal.Post.Source);
+                bool include = false;
+                if (numSkipped >= numToRemove)
+                {
+                    include = true;
+                }
+                else
+                {
+                    if (this.orderedInteractions[i].Starred)
+                    {
+                        include = true;
+                    }
+                }
+                if (include)
+                {
+                    PostInteraction interaction = this.orderedInteractions[i];
+                    newOrderedInteractions.Add(interaction);
+                    newKeyedInteractions.Add(interaction.Post.Source, interaction);
+                }
+                else
+                {
+                    numSkipped++;
+                }
             }
-            this.orderedInteractions = this.orderedInteractions.GetRange(numToRemove, size);
+            this.orderedInteractions = newOrderedInteractions;
+            this.keyedInteractions = newKeyedInteractions;
         }
         public IEnumerable<PostInteraction> GetPosts()
         {
