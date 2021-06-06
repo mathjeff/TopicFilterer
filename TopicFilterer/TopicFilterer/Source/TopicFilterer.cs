@@ -319,7 +319,7 @@ namespace TopicFilterer
         }
         private void startGetData()
         {
-            List<ValueProvider<String>> pendingDownloads = this.startDownloadData();
+            List<UrlDownloader> pendingDownloads = this.startDownloadData();
             this.pendingDownloads = pendingDownloads;
             this.analyzedPosts = new List<AnalyzedPost>();
             this.downloadsStatus = new DownloadsStatus(this.pendingDownloads.Count);
@@ -339,7 +339,7 @@ namespace TopicFilterer
             this.cannotUpdate_layout.setBackgroundColor(Color.Black);
             this.updateButton = new Button();
             this.updateButton.Clicked += UpdateButton_Clicked;
-            this.updateButton_layout = new ButtonLayout(this.updateButton, "", 32);
+            this.updateButton_layout = new ButtonLayout(this.updateButton, "", 32, true, false, false, true);
             this.downloadStatus_container = new ContainerLayout();
             this.update_numCompletedDownloads_status();
         }
@@ -354,7 +354,7 @@ namespace TopicFilterer
             System.Diagnostics.Debug.WriteLine("downloadNextUrl");
             if (this.pendingDownloads.Count > 0)
             {
-                ValueProvider<String> request = this.pendingDownloads[0];
+                UrlDownloader request = this.pendingDownloads[0];
                 this.pendingDownloads.RemoveAt(0);
 
                 Task.Run(() =>
@@ -363,18 +363,18 @@ namespace TopicFilterer
                     String text = request.Get();
                     Device.BeginInvokeOnMainThread(() =>
                     {
-                        this.downloadCompleted(text);
+                        this.downloadCompleted(text, request.Url);
                     });
                 });
             }
         }
-        private void downloadCompleted(String text)
+        private void downloadCompleted(string text, string url)
         {
             System.Diagnostics.Debug.WriteLine("downloadCompleted");
-            this.onReceivedData(text);
+            this.onReceivedData(text, url);
             this.downloadNextUrl();
         }
-        private void onReceivedData(string text)
+        private void onReceivedData(string text, string url)
         {
             System.Diagnostics.Debug.WriteLine("onRecievedData");
             this.downloadsStatus.NumUrlsLeftToDownload--;
@@ -391,6 +391,7 @@ namespace TopicFilterer
                 {
                     System.Diagnostics.Debug.WriteLine("Error downloading data: " + e);
                     this.downloadsStatus.NumFailed++;
+                    this.downloadsStatus.SampleFailure = url;
                 }
             }
             this.update_numCompletedDownloads_status();
@@ -414,7 +415,7 @@ namespace TopicFilterer
                 }
             }
             if (this.downloadsStatus.NumFailed > 0)
-                message += " (" + this.downloadsStatus.NumFailed + " failed)";
+                message += " (" + this.downloadsStatus.NumFailed + " failed, including " + this.downloadsStatus.SampleFailure + ")";
             System.Diagnostics.Debug.WriteLine("NumCompletedDownloads status message: '" + message + "'");
 
             if (this.downloadsStatus.NumUrlsDownloadedButNotShown > 0)
@@ -429,29 +430,11 @@ namespace TopicFilterer
             }
         }
 
-        private List<ValueProvider<String>> startDownloadData()
+        private List<UrlDownloader> startDownloadData()
         {
             WebClient webClient = new WebClient();
-            List<ValueProvider<String>> requests = new List<ValueProvider<string>>();
+            List<UrlDownloader> requests = new List<UrlDownloader>();
             IEnumerable<String> urls = this.userPreferences_database.FeedUrls;
-            /*List<String> urls = new List<String>() {
-                "https://www.reddit.com/.rss",
-                "https://news.google.com/rss",
-                "https://hackaday.com/feed/",
-
-                "http://connect.biorxiv.org/biorxiv_xml.php?subject=all",
-                "https://www.nature.com/nature.rss",
-                "http://www.nature.com/nm/current_issue/rss",
-                "http://www.nature.com/nmeth/current_issue/rss",
-                "http://www.nature.com/nbt/current_issue/rss",
-                "http://www.nature.com/nrmicro/current_issue/rss",
-                "https://www.nature.com/ncomms.rss",
-                "https://www.cell.com/cell/current.rss",
-                "https://science.sciencemag.org/rss/current.xml",
-                "http://www.cell.com/cell-host-microbe/current.rss",
-                "https://elifesciences.org/rss/recent.xml",
-                "https://elifesciences.org/rss/ahead.xml"
-            };*/
             foreach (string urlText in urls)
             {
                 UrlDownloader request = new UrlDownloader(webClient, urlText);
@@ -498,7 +481,7 @@ namespace TopicFilterer
             return this.LayoutStack.GoBack();
         }
 
-        List<ValueProvider<String>> pendingDownloads = null;
+        List<UrlDownloader> pendingDownloads = null;
         List<AnalyzedPost> analyzedPosts = null;
 
         private ViewManager viewManager;

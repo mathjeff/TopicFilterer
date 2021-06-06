@@ -6,15 +6,15 @@ using VisiPlacement;
 
 namespace TopicFilterer
 {
-    class UrlDownloader : ValueProvider<String>
+    class UrlDownloader
     {
-        public UrlDownloader(WebClient webClient, String url)
+        public UrlDownloader(WebClient webClient, string url)
         {
             this.webClient = webClient;
             this.url = url;
         }
 
-        public String Get()
+        public string Get()
         {
             try
             {
@@ -28,6 +28,13 @@ namespace TopicFilterer
                 System.Diagnostics.Debug.WriteLine("Failed to open " + this.url + ", " + e);
             }
             return null;
+        }
+        public string Url
+        {
+            get
+            {
+                return this.url;
+            }
         }
         private WebClient webClient;
         private string url;
