@@ -279,7 +279,7 @@ namespace TopicFilterer
 
             PostInteraction interaction = this.postDatabase.Get(post);
             if (interaction.Visited)
-                score -= 1;
+                score = -1;
 
             return new AnalyzedPost(interaction, score, titleComponents);
         }
