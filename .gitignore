@@ -11,3 +11,6 @@ temp
 packages
 *.user
 *~
+*TemporaryKey.pfx
+AppPackages
+BundleArtifacts
