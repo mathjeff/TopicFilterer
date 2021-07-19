@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using VisiPlacement.UWP;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -20,6 +21,8 @@ namespace TopicFilterer.UWP
         public MainPage()
         {
             this.InitializeComponent();
+
+            UWPTextMeasurer.Initialize();
 
             LoadApplication(new TopicFilterer.App());
         }
