@@ -124,16 +124,24 @@ namespace TopicFilterer.View
 
                     previousScore = thisScore;
                 }
-                PostView postView = new PostView(scoredPost);
-                postView.PostClicked += PostView_PostClicked;
-                postView.PostStarred += PostView_PostStarred;
-                gridBuilder.AddLayout(postView);
+                gridBuilder.AddLayout(this.viewForPost(scoredPost));
             }
             if (hasMore)
                 gridBuilder.AddLayout(this.nextButton_layout);
             this.SubLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
         }
 
+        private PostView viewForPost(AnalyzedPost post)
+        {
+            if (!this.postViewCache.ContainsKey(post))
+            {
+                PostView postView = new PostView(post);
+                postView.PostClicked += PostView_PostClicked;
+                postView.PostStarred += PostView_PostStarred;
+                this.postViewCache[post] = postView;
+            }
+            return this.postViewCache[post];
+        }
         private void PostView_PostClicked(PostInteraction post)
         {
             this.PostClicked.Invoke(post);
@@ -154,5 +162,6 @@ namespace TopicFilterer.View
         private List<AnalyzedPost> posts;
         private int displayIndex;
         private int pageSize = 30;
+        private Dictionary<AnalyzedPost, PostView> postViewCache = new Dictionary<AnalyzedPost, PostView>();
     }
 }
