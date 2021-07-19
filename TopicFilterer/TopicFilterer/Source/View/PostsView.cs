@@ -21,14 +21,27 @@ namespace TopicFilterer.View
         {
             this.downloadsStatus = downloadsStatus;
             this.downloadsStatus.Updated += DownloadsStatus_Updated;
+
             this.setupUpdateLayout();
+
+            this.nextButton = new Button();
+            this.nextButton_layout = new ButtonLayout(this.nextButton, "More", 16);
+            this.nextButton.Clicked += NextButton_Clicked;
+        }
+
+        private void NextButton_Clicked(object sender, EventArgs e)
+        {
+            this.displayIndex += this.pageSize;
+            this.update();
         }
 
         public List<AnalyzedPost> Posts
         {
             set
             {
-                this.update(value);
+                this.posts = value;
+                this.displayIndex = 0;
+                this.update();
             }
         }
         private void setupUpdateLayout()
@@ -41,7 +54,7 @@ namespace TopicFilterer.View
             this.updateButton_layout = new ButtonLayout(this.updateButton, "", 32, true, false, false, true);
             this.downloadStatus_container = new ContainerLayout();
             this.update_numCompletedDownloads_status();
-            this.update(new List<AnalyzedPost>());
+            this.Posts = new List<AnalyzedPost>();
         }
 
         private void UpdateButton_Clicked(object sender, EventArgs e)
@@ -87,14 +100,16 @@ namespace TopicFilterer.View
             }
         }
 
-        private void update(List<AnalyzedPost> posts)
+        private void update()
         {
             Vertical_GridLayout_Builder gridBuilder = new Vertical_GridLayout_Builder();
             gridBuilder.AddLayout(this.downloadStatus_container);
 
-            int maxCountToShow = 30;
-            if (posts.Count > maxCountToShow)
-                posts = posts.GetRange(0, maxCountToShow);
+            int minIndex = this.displayIndex;
+            int maxIndex = Math.Min(this.posts.Count, minIndex + this.pageSize);
+            bool hasMore = this.posts.Count > this.displayIndex + this.pageSize;
+            List<AnalyzedPost> posts = this.posts.GetRange(minIndex, maxIndex - minIndex);
+
             double previousScore = double.NegativeInfinity;
             foreach (AnalyzedPost scoredPost in posts)
             {
@@ -114,6 +129,8 @@ namespace TopicFilterer.View
                 postView.PostStarred += PostView_PostStarred;
                 gridBuilder.AddLayout(postView);
             }
+            if (hasMore)
+                gridBuilder.AddLayout(this.nextButton_layout);
             this.SubLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
         }
 
@@ -131,6 +148,11 @@ namespace TopicFilterer.View
         private ContainerLayout downloadStatus_container;
         private Button updateButton;
         private ButtonLayout updateButton_layout;
+        private Button nextButton;
+        private ButtonLayout nextButton_layout;
         private TextblockLayout cannotUpdate_layout;
+        private List<AnalyzedPost> posts;
+        private int displayIndex;
+        private int pageSize = 30;
     }
 }
