@@ -56,8 +56,19 @@ namespace TopicFilterer.View
             mainBuilder.AddLayout(this.linkLayout);
 
             Button openButton = new Button();
-            mainBuilder.AddLayout(new ButtonLayout(openButton, "Open", 16));
+            ButtonLayout openLayout = new ButtonLayout(openButton, "Open", 16);
             openButton.Clicked += OpenButton_Clicked;
+
+            Button dismissButton = new Button();
+            ButtonLayout dismissLayout = new ButtonLayout(dismissButton, "Mark Read", 16);
+            dismissButton.Clicked += DismissButton_Clicked;
+
+            mainBuilder.AddLayout(
+                new Horizontal_GridLayout_Builder().Uniform()
+                    .AddLayout(openLayout)
+                    .AddLayout(dismissLayout)
+                    .BuildAnyLayout()
+            );
 
             this.SubLayout = mainBuilder.BuildAnyLayout();
         }
@@ -89,8 +100,7 @@ namespace TopicFilterer.View
 
         private void OpenButton_Clicked(object sender, EventArgs e)
         {
-            this.post.Interaction.Visited = true;
-            this.updateLinkColor();
+            this.MarkVisited();
             string source = this.post.Interaction.Post.Source;
             if (source != null && null != "")
             {
@@ -99,6 +109,16 @@ namespace TopicFilterer.View
                     this.PostClicked.Invoke(this.post.Interaction);
                 }
             }
+        }
+        private void DismissButton_Clicked(object sender, EventArgs e)
+        {
+            this.MarkVisited();
+        }
+
+        private void MarkVisited()
+        {
+            this.post.Interaction.Visited = true;
+            this.updateLinkColor();
         }
         AnalyzedPost post;
         TextblockLayout linkLayout;
