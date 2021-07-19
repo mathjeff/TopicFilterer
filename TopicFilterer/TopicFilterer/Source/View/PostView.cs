@@ -42,12 +42,12 @@ namespace TopicFilterer.View
                 titleBuilder.AddLayout(textBlockLayout);
             }
             this.starButton = new Button();
-            this.updateStarButton();
             this.starButton.Clicked += SaveButton_Clicked;
 
             GridLayout topGrid = GridLayout.New(new BoundProperty_List(1), BoundProperty_List.WithRatios(new List<double>() { 5, 1 }), LayoutScore.Zero);
             topGrid.AddLayout(titleBuilder.BuildAnyLayout());
-            topGrid.AddLayout(new ButtonLayout(this.starButton));
+            topGrid.AddLayout(new ButtonLayout(this.starButton, "", 16));
+            this.updateStarButton();
             mainBuilder.AddLayout(topGrid);
 
             this.linkLayout = new TextblockLayout(post.Interaction.Post.Source, 16, false, true);
