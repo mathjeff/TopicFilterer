@@ -12,6 +12,8 @@ namespace TopicFilterer.View
         public delegate void ClickedHandler(PostInteraction post);
         public event StarredHandler PostStarred;
         public delegate void StarredHandler(PostInteraction post);
+        public event DismissedHandler Dismissed;
+        public delegate void DismissedHandler(PostView post);
         public PostView(AnalyzedPost post)
         {
             this.post = post;
@@ -60,7 +62,7 @@ namespace TopicFilterer.View
             openButton.Clicked += OpenButton_Clicked;
 
             Button dismissButton = new Button();
-            ButtonLayout dismissLayout = new ButtonLayout(dismissButton, "Mark Read", 16);
+            ButtonLayout dismissLayout = new ButtonLayout(dismissButton, "Dismiss", 16);
             dismissButton.Clicked += DismissButton_Clicked;
 
             mainBuilder.AddLayout(
@@ -113,6 +115,7 @@ namespace TopicFilterer.View
         private void DismissButton_Clicked(object sender, EventArgs e)
         {
             this.MarkVisited();
+            this.Dismissed.Invoke(this);
         }
 
         private void MarkVisited()

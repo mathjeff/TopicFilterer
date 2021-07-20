@@ -128,7 +128,8 @@ namespace TopicFilterer.View
             }
             if (hasMore)
                 gridBuilder.AddLayout(this.nextButton_layout);
-            this.SubLayout = ScrollLayout.New(gridBuilder.BuildAnyLayout());
+            this.gridLayout = gridBuilder.Build();
+            this.SubLayout = ScrollLayout.New(this.gridLayout);
         }
 
         private PostView viewForPost(AnalyzedPost post)
@@ -138,10 +139,25 @@ namespace TopicFilterer.View
                 PostView postView = new PostView(post);
                 postView.PostClicked += PostView_PostClicked;
                 postView.PostStarred += PostView_PostStarred;
+                postView.Dismissed += PostView_Dismissed;
                 this.postViewCache[post] = postView;
             }
             return this.postViewCache[post];
         }
+
+        private void PostView_Dismissed(PostView post)
+        {
+            int count = this.gridLayout.NumRows; 
+            for (int i = 0; i < count; i++)
+            {
+                if (this.gridLayout.GetLayout(0, i) == post)
+                {
+                    this.gridLayout.PutLayout(null, 0, i);
+                    return;
+                }
+            }
+        }
+
         private void PostView_PostClicked(PostInteraction post)
         {
             this.PostClicked.Invoke(post);
@@ -163,5 +179,6 @@ namespace TopicFilterer.View
         private int displayIndex;
         private int pageSize = 30;
         private Dictionary<AnalyzedPost, PostView> postViewCache = new Dictionary<AnalyzedPost, PostView>();
+        private GridLayout gridLayout;
     }
 }
