@@ -81,7 +81,7 @@ namespace TopicFilterer.View
                 }
                 else
                 {
-                    message = "" + this.downloadsStatus.NumUrlsLeftToDownload + " urls left to download; " + this.downloadsStatus.NumUrlsDownloadedButNotShown + " new urls to show";
+                    message = "" + this.downloadsStatus.NumUrlsLeftToDownload + " feeds left to download; " + this.downloadsStatus.NumUrlsDownloadedButNotShown + " new feeds to show";
                 }
             }
             if (this.downloadsStatus.NumFailed > 0)
