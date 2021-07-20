@@ -69,7 +69,7 @@ namespace TopicFilterer
                 postView.PostStarred += PostView_PostStarred;
                 builder.AddLayout(postView);
             }
-            return builder.BuildAnyLayout();
+            return ScrollLayout.New(builder.BuildAnyLayout());
         }
         private List<PostInteraction> getStarredPosts()
         {
