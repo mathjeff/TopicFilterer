@@ -9,7 +9,7 @@
   <Identity
     Name="2da12c81-376d-49ce-82bc-47606b4fc378"
     Publisher="CN=Jeff Gaston"
-    Version="1.0.0.0" />
+    Version="1.0.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="ec0cc741-fd3e-485c-81be-68815c480690" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
