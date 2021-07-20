@@ -115,7 +115,10 @@ namespace TopicFilterer.View
         private void DismissButton_Clicked(object sender, EventArgs e)
         {
             this.MarkVisited();
-            this.Dismissed.Invoke(this);
+            if (this.Dismissed != null)
+            {
+                this.Dismissed.Invoke(this);
+            }
         }
 
         private void MarkVisited()

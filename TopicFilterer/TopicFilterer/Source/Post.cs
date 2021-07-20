@@ -24,7 +24,18 @@ namespace TopicFilterer
             this.TitleComponents = analyzedTitle;
         }
         public PostInteraction Interaction;
+        // How good we think this post is based on the rules
         public double Score;
+        // How good we think this post is now based on the rules and based on any other interactions
+        public double CurrentScore
+        {
+            get
+            {
+                if (this.Interaction.Visited)
+                    return -1;
+                return this.Score;
+            }
+        }
         public List<AnalyzedString> TitleComponents;
     }
 
@@ -43,7 +54,7 @@ namespace TopicFilterer
     {
         public int Compare(AnalyzedPost a, AnalyzedPost b)
         {
-            return a.Score.CompareTo(b.Score);
+            return a.CurrentScore.CompareTo(b.CurrentScore);
         }
     }
 
