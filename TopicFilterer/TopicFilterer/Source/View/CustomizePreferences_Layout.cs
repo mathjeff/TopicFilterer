@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using TopicFilterer.Scoring;
 using VisiPlacement;
 using Xamarin.Forms;
@@ -411,7 +413,7 @@ namespace TopicFilterer.View
             // save some properties
             this.userPreferencesDatabase = userPreferencesDatabase;
 
-            // setup display
+            // set up display
             Vertical_GridLayout_Builder newFeedBuilder = new Vertical_GridLayout_Builder();
             TextblockLayout newFeedHelp = new TextblockLayout("Add new feed:");
             newFeedHelp.setBackgroundColor(Color.Black);
@@ -435,19 +437,62 @@ namespace TopicFilterer.View
                 this.FeedUrls.Add(this.newFeedBox.Text);
                 this.newFeedBox.Text = "";
                 this.updateLayout();
+                this.validateUrl(this.FeedUrls.Count - 1);
             }
         }
 
+        private void validateUrl(int index)
+        {
+            string url = this.FeedUrls[index];
+
+            if (this.webClient == null)
+                this.webClient = new WebClient();
+
+            Task.Run(() =>
+            {
+                UrlDownloader request = new UrlDownloader(this.webClient, url);
+                System.Diagnostics.Debug.WriteLine("Validating " + url);
+                String text = request.Get();
+                List<Post> posts = new List<Post>();
+                try
+                {
+                    posts = this.feedParser.parse(text);
+                }
+                catch (Exception e)
+                {
+                    System.Diagnostics.Debug.WriteLine("Not valid feed url: " + url);
+                }
+                bool validUrl = posts.Count > 0;
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.urlValidity[url] = validUrl;
+                    this.updateColors();
+                });
+            });
+
+        }
+
+
         private void updateLayout()
         {
+            this.feedButtons = new Dictionary<string, List<ButtonLayout>>();
+
             Vertical_GridLayout_Builder largeFont_builder = new Vertical_GridLayout_Builder();
             Vertical_GridLayout_Builder smallFont_builder = new Vertical_GridLayout_Builder();
             foreach (string url in this.FeedUrls)
             {
                 Button feedButton = new Button();
                 feedButton.Clicked += FeedButton_Clicked;
-                largeFont_builder.AddLayout(new ButtonLayout(feedButton, url, 24, true, false, false, true));
-                smallFont_builder.AddLayout(new ButtonLayout(feedButton, url, 16, true, false, false, true));
+                ButtonLayout large = new ButtonLayout(feedButton, url, 24, true, false, false, true);
+                ButtonLayout small = new ButtonLayout(feedButton, url, 16, true, false, false, true);
+
+                largeFont_builder.AddLayout(large);
+                smallFont_builder.AddLayout(small);
+
+                List<ButtonLayout> buttonsHere = new List<ButtonLayout>();
+                buttonsHere.Add(large);
+                buttonsHere.Add(small);
+                this.feedButtons[url] = buttonsHere;
             }
 
             LayoutChoice_Set topLayout = ScrollLayout.New(new LayoutUnion(largeFont_builder.Build(), smallFont_builder.Build()));
@@ -455,6 +500,31 @@ namespace TopicFilterer.View
                 .AddLayout(topLayout)
                 .AddLayout(this.newFeedsLayout)
                 .Build();
+            this.updateColors();
+        }
+
+        private void updateColors()
+        {
+            foreach (KeyValuePair<string, List<ButtonLayout>> entry in this.feedButtons)
+            {
+                string url = entry.Key;
+                foreach (ButtonLayout buttonLayout in entry.Value)
+                {
+                    Color textColor;
+                    if (this.urlValidity.ContainsKey(url))
+                    {
+                        if (this.urlValidity[url])
+                            textColor = Color.Green;
+                        else
+                            textColor = Color.Red;
+                    }
+                    else
+                    {
+                        textColor = Color.White;
+                    }
+                    buttonLayout.setTextColor(textColor);
+                }
+            }
         }
 
         private void FeedButton_Clicked(object sender, EventArgs e)
@@ -479,5 +549,9 @@ namespace TopicFilterer.View
         UserPreferences_Database userPreferencesDatabase;
         Editor newFeedBox;
         LayoutChoice_Set newFeedsLayout;
+        FeedParser feedParser = new FeedParser();
+        WebClient webClient;
+        Dictionary<string, bool> urlValidity = new Dictionary<string, bool>();
+        Dictionary<string, List<ButtonLayout>> feedButtons = new Dictionary<string, List<ButtonLayout>>();
     }
 }

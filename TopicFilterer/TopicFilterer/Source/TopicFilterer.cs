@@ -133,43 +133,6 @@ namespace TopicFilterer
             this.startGetData();
         }
 
-        private List<Post> parse(string text)
-        {
-            XmlDocument parse = new XmlDocument();
-            parse.LoadXml(text);
-
-            XmlNode feed = parse.FirstChild;
-            if (feed.ChildNodes.Count == 1 && feed.FirstChild.Name == "channel")
-            {
-                feed = feed.FirstChild;
-            }
-            return this.extractPosts(feed);
-        }
-        private List<Post> extractPosts(XmlNode feed)
-        {
-            List<XmlNode> items = new List<XmlNode>();
-
-            foreach (XmlNode node in feed.ChildNodes)
-            {
-                if (node.Name == "entry" || node.Name == "item")
-                {
-                    items.Add(node);
-                }
-            }
-
-            List<Post> posts = new List<Post>();
-
-            foreach (XmlNode node in items)
-            {
-                Post post = this.postFromData(node);
-                if (post.Title != null && post.Title != "")
-                    posts.Add(post);
-                else
-                    System.Diagnostics.Debug.WriteLine("Invalid post: " + post);
-            }
-            return posts;
-        }
-
         private void showPosts(PostsView postsView)
         {
             List<AnalyzedPost> posts = new List<AnalyzedPost>(this.analyzedPosts);
@@ -340,7 +303,7 @@ namespace TopicFilterer
             {
                 try
                 {
-                    List<Post> posts = this.parse(text);
+                    List<Post> posts = this.feedParser.parse(text);
                     List<AnalyzedPost> analyzedPosts = this.analyzePosts(posts);
                     this.analyzedPosts.AddRange(analyzedPosts);
                     this.downloadsStatus.NumUrlsDownloadedButNotShown++;
@@ -367,38 +330,6 @@ namespace TopicFilterer
             return requests;
         }
 
-        private Post postFromData(XmlNode data)
-        {
-            Post post = new Post();
-
-            foreach (XmlNode child in data.ChildNodes)
-            {
-                if (child.Name == "title")
-                {
-                    if (child.ChildNodes.Count == 1)
-                        post.Title = child.FirstChild.Value;
-                }
-                if (child.Name == "content")
-                {
-                    if (child.ChildNodes.Count == 1)
-                        post.Text = child.FirstChild.Value;
-                }
-                if (child.Name == "link")
-                {
-                    String attributeValue = child.getAttribute("href");
-                    if (attributeValue != null)
-                    {
-                        post.Source = attributeValue;
-                    }
-                    else
-                    {
-                        if (child.ChildNodes.Count == 1)
-                            post.Source = child.FirstChild.Value;
-                    }
-                }
-            }
-            return post;
-        }
 
         public bool GoBack()
         {
@@ -418,6 +349,7 @@ namespace TopicFilterer
         private DownloadsStatus downloadsStatus;
         private UserPreferences_Database userPreferences_database = new UserPreferences_Database();
         private LayoutChoice_Set preferencesLayout;
-        TextConverter textConverter = new TextConverter();
+        private TextConverter textConverter = new TextConverter();
+        private FeedParser feedParser = new FeedParser();
     }
 }
