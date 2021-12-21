@@ -475,24 +475,17 @@ namespace TopicFilterer.View
 
         private void updateLayout()
         {
-            this.feedButtons = new Dictionary<string, List<ButtonLayout>>();
-
             Vertical_GridLayout_Builder largeFont_builder = new Vertical_GridLayout_Builder();
             Vertical_GridLayout_Builder smallFont_builder = new Vertical_GridLayout_Builder();
             foreach (string url in this.FeedUrls)
             {
                 Button feedButton = new Button();
                 feedButton.Clicked += FeedButton_Clicked;
-                ButtonLayout large = new ButtonLayout(feedButton, url, 24, true, false, false, true);
-                ButtonLayout small = new ButtonLayout(feedButton, url, 16, true, false, false, true);
+                ButtonLayout large = this.getFeedButton(url, 24);
+                ButtonLayout small = this.getFeedButton(url, 16);
 
                 largeFont_builder.AddLayout(large);
                 smallFont_builder.AddLayout(small);
-
-                List<ButtonLayout> buttonsHere = new List<ButtonLayout>();
-                buttonsHere.Add(large);
-                buttonsHere.Add(small);
-                this.feedButtons[url] = buttonsHere;
             }
 
             LayoutChoice_Set topLayout = ScrollLayout.New(new LayoutUnion(largeFont_builder.Build(), smallFont_builder.Build()));
@@ -503,12 +496,27 @@ namespace TopicFilterer.View
             this.updateColors();
         }
 
+        private ButtonLayout getFeedButton(string url, int fontSize)
+        {
+            if (!this.cachedLayouts.ContainsKey(url))
+            {
+                this.cachedLayouts[url] = new Dictionary<int, ButtonLayout>();
+            }
+            Dictionary<int, ButtonLayout> buttonsBySize = this.cachedLayouts[url];
+            if (!buttonsBySize.ContainsKey(fontSize))
+            {
+                Button feedButton = new Button();
+                feedButton.Clicked += FeedButton_Clicked;
+                buttonsBySize[fontSize] = new ButtonLayout(feedButton, url, fontSize, true, false, false, true);
+            }
+            return buttonsBySize[fontSize];
+        }
         private void updateColors()
         {
-            foreach (KeyValuePair<string, List<ButtonLayout>> entry in this.feedButtons)
+            foreach (KeyValuePair<string, Dictionary<int, ButtonLayout>> entry in this.cachedLayouts)
             {
                 string url = entry.Key;
-                foreach (ButtonLayout buttonLayout in entry.Value)
+                foreach (ButtonLayout buttonLayout in entry.Value.Values)
                 {
                     Color textColor;
                     if (this.urlValidity.ContainsKey(url))
@@ -552,6 +560,8 @@ namespace TopicFilterer.View
         FeedParser feedParser = new FeedParser();
         WebClient webClient;
         Dictionary<string, bool> urlValidity = new Dictionary<string, bool>();
-        Dictionary<string, List<ButtonLayout>> feedButtons = new Dictionary<string, List<ButtonLayout>>();
+
+        // given a url and a font size, returns a ButtonLayout
+        Dictionary<string, Dictionary<int, ButtonLayout>> cachedLayouts = new Dictionary<string, Dictionary<int, ButtonLayout>>();
     }
 }
