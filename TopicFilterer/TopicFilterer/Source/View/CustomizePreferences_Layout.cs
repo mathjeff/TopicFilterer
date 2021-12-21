@@ -122,9 +122,20 @@ namespace TopicFilterer.View
         public New_ScoringRule_Layout(UserPreferences_Database userPreferencesDatabase)
         {
             this.userPreferencesDatabase = userPreferencesDatabase;
-            this.progressContainer = new ContainerLayout();
+
+            this.progressLayout = new TextblockLayout();
+            this.progressLayout.setBackgroundColor(Color.Black);
+            this.progressLayout.setTextColor(Color.White);
+
+            this.feedbackLayout = new TextblockLayout();
+            this.feedbackLayout.setBackgroundColor(Color.Black);
+            this.feedbackLayout.setTextColor(Color.White);
+
             LayoutChoice_Set controlsContainer = this.makeControls();
-            this.SubLayout = new Vertical_GridLayout_Builder().AddLayout(this.progressContainer).AddLayout(controlsContainer).Build();
+            this.SubLayout = new Vertical_GridLayout_Builder()
+                .AddLayout(this.progressLayout)
+                .AddLayout(this.feedbackLayout)
+                .AddLayout(controlsContainer).Build();
             this.Clear();
         }
         private LayoutChoice_Set makeControls()
@@ -175,7 +186,7 @@ namespace TopicFilterer.View
         private void NotButton_Clicked(object sender, EventArgs e)
         {
             NotPredicate not = new NotPredicate();
-            this.openPredicates.Add(not);
+            this.addChild(not);
             this.updateLayout();
         }
 
@@ -227,7 +238,7 @@ namespace TopicFilterer.View
 
         private void closeParen()
         {
-            if (this.openPredicates.Count > 0)
+            if (this.openPredicates.Count > 1)
             {
                 // Remove this pending child and attach it to its parent.
                 // This indicates that from now on we won't make any more changes to this child.
@@ -235,6 +246,10 @@ namespace TopicFilterer.View
                 TextPredicate predicate = this.openPredicates.Last();
                 this.openPredicates.RemoveAt(this.openPredicates.Count - 1);
                 this.addChild(predicate);
+            }
+            else
+            {
+                this.setError("There is no matching \"(\"!");
             }
         }
 
@@ -264,6 +279,7 @@ namespace TopicFilterer.View
             {
                 and.AddChild(child);
                 this.openPredicates.Add(and);
+                this.clearError();
             }
             else
             {
@@ -278,9 +294,15 @@ namespace TopicFilterer.View
             if (text != null && text != "")
             {
                 ContainsPhrase_Predicate word = new ContainsPhrase_Predicate(text);
-                this.newWord_box.Text = "";
-                this.addChild(word);
+                if (this.addChild(word))
+                {
+                    this.newWord_box.Text = "";
+                }
                 this.updateLayout();
+            }
+            else
+            {
+                this.setError("Type a word or phrase first");
             }
         }
 
@@ -296,13 +318,14 @@ namespace TopicFilterer.View
         }
 
         // add the given predicate as a child of the leafmost existing predicate
-        private void addChild(TextPredicate predicate)
+        private bool addChild(TextPredicate predicate)
         {
+            this.clearError();
             if (this.openPredicates.Count < 1)
             {
                 // no predicates already exist, this one becomes the primary one
                 this.openPredicates.Add(predicate);
-                return;
+                return true;
             }
             TextPredicate last = this.openPredicates.Last();
             OrPredicate or = last as OrPredicate;
@@ -310,21 +333,21 @@ namespace TopicFilterer.View
             {
                 // we have a pending 'or'; add it here
                 or.AddChild(predicate);
-                return;
+                return true;
             }
             AndPredicate and = last as AndPredicate;
             if (and != null)
             {
                 // we have a pending 'and'; add it here
                 and.AddChild(predicate);
-                return;
+                return true;
             }
             NotPredicate not = last as NotPredicate;
             if (not != null)
             {
                 // we have a pending 'not'; add it here
                 not.Child = predicate;
-                return;
+                return true;
             }
             if (last == null)
             {
@@ -333,9 +356,10 @@ namespace TopicFilterer.View
                 // If the user doesn't attach this to a parent later, we will for them
                 this.openPredicates.RemoveAt(this.openPredicates.Count - 1);
                 this.openPredicates.Add(predicate);
-                return;
+                return true;
             }
-            // error; do nothing
+            this.setError("Already have an expression, try And or Or first");
+            return false;
         }
 
         public void Clear()
@@ -357,19 +381,26 @@ namespace TopicFilterer.View
             }
             return builder.ToString();
         }
+        private void setError(string text)
+        {
+            this.feedbackLayout.setText(text);
+            this.feedbackLayout.setTextColor(Color.Red);
+        }
+        private void clearError()
+        {
+            this.feedbackLayout.setText(null);
+        }
         private void updateLayout()
         {
-            TextblockLayout text = new TextblockLayout(this.GetText());
-            text.setBackgroundColor(Color.Black);
-            text.setTextColor(Color.White);
-            this.progressContainer.SubLayout = text;
+            this.progressLayout.setText(this.GetText());
         }
 
         List<TextPredicate> openPredicates;
         Editor newWord_box;
         Editor scoreBox;
         UserPreferences_Database userPreferencesDatabase;
-        ContainerLayout progressContainer;
+        TextblockLayout progressLayout;
+        TextblockLayout feedbackLayout;
     }
 
 
