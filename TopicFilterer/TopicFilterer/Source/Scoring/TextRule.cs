@@ -28,6 +28,7 @@ namespace TopicFilterer.Scoring
                 return false;
             for (int i = 0; i <= text.Length - this.word.Length; i++)
             {
+                string substring = text.Substring(i, this.word.Length).ToLower();
                 // it only counts if there is a word break before this position
                 if (!isBreak(text, i - 1))
                     continue;
@@ -35,7 +36,7 @@ namespace TopicFilterer.Scoring
                 if (!isBreak(text, i + this.word.Length))
                     continue;
                 // now check that the contents between these breaks is the word we're looking for
-                if (text.Substring(i, this.word.Length).ToLower() != this.word)
+                if (substring != this.word)
                     continue;
                 return true;
             }
@@ -59,15 +60,9 @@ namespace TopicFilterer.Scoring
         // tells whether this position contains is a break between words
         private bool isBreak(string text, int position)
         {
-            if (position == -1 || position == text.Length)
-            {
-                return true;
-            }
-            char c = text[position];
-            return wordSeparators.Contains(c);
+            return TextParser.isBreak(text, position);
         }
         private string word;
-        private static HashSet<char> wordSeparators = new HashSet<char>() { ' ', ',', '.', '!', '?', '-' };
     }
 
     public class AndPredicate : TextPredicate

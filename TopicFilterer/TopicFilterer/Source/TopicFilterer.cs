@@ -193,20 +193,38 @@ namespace TopicFilterer
             double score = this.scoreTitle(title);
 
             List<AnalyzedString> titleComponents = new List<AnalyzedString>();
-            List<String> words = new List<String>(title.Split(new char[] { ' ' }));
-            for (int i = 0; i < words.Count; i++)
+            int prevEnd = 0;
+            if (title.Contains("High:"))
             {
-                List<String> hypotheticalWords = new List<String>(words);
-                hypotheticalWords.RemoveAt(i);
-                double hypotheticalScore = this.scoreTitle(string.Join(" ", hypotheticalWords));
-                double difference = score.CompareTo(hypotheticalScore);
-                titleComponents.Add(new AnalyzedString(words[i], difference));
+                System.Diagnostics.Debug.WriteLine("found it");
+            }
+            // search for each word break
+            for (int i = 0; i < title.Length; i++)
+            {
+                if (TextParser.isBreak(title, i))
+                {
+                    // We found a word break.
+                    // If there are several consecutive word breaks, only use the last one
+                    if (!TextParser.isBreak(title, i + 1))
+                    {
+                        // Check what happens to the score if we remove the word that just ended
+                        int newEnd = i + 1;
+                        string prefix = title.Substring(0, prevEnd);
+                        string middle = title.Substring(prevEnd, newEnd - prevEnd);
+                        string end = title.Substring(newEnd);
+                        double scoreWithoutMiddle = this.scoreTitle(prefix + end);
+                        double difference = score.CompareTo(scoreWithoutMiddle);
+                        titleComponents.Add(new AnalyzedString(middle, difference));
+
+                        prevEnd = newEnd;
+                    }
+                }
             }
             for (int i = titleComponents.Count - 1; i >= 1; i--)
             {
                 if (titleComponents[i].Score == titleComponents[i - 1].Score)
                 {
-                    titleComponents[i - 1] = new AnalyzedString(titleComponents[i - 1].Text + " " + titleComponents[i].Text, titleComponents[i].Score);
+                    titleComponents[i - 1] = new AnalyzedString(titleComponents[i - 1].Text + titleComponents[i].Text, titleComponents[i].Score);
                     titleComponents.RemoveAt(i);
                 }
             }
