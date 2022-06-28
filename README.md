@@ -2,8 +2,8 @@ TopicFilterer is an RSS reader using Xamarin that organizes some code into separ
 
 To build TopicFilterer:
 
-1. Checkout the source dependencies from the git submodules.
-   This can be done via `git submodule init`.
+1. Checkout the source dependencies via git submodules.
+   This can be done via `git submodule init && git submodule update`.
 2. Install Visual Studio.
 3. Install the Xamarin plugin to Visual Studio
 4. Open TopicFilterer.sln in Visual Studio.
