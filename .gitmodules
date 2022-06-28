@@ -1,0 +1,13 @@
+[submodule "StatList"]
+	path = deps/StatList
+	url = ../StatList
+
+[submodule "VisiPlacer"]
+	path = deps/VisiPlacer
+	url = ../VisiPlacer
+[submodule "deps/StatList"]
+	path = deps/StatList
+	url = ../StatList
+[submodule "deps/VisiPlacer"]
+	path = deps/VisiPlacer
+	url = ../VisiPlacer
