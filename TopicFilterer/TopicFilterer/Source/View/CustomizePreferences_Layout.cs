@@ -154,7 +154,6 @@ namespace TopicFilterer.View
             Button textButton = new Button();
             textButton.Clicked += TextButton_Clicked;
             this.newWord_box = new Editor();
-            this.newWord_box.Keyboard = Keyboard.Numeric;
 
             LayoutChoice_Set wordLayout = new Horizontal_GridLayout_Builder().Uniform()
                 .AddLayout(new ButtonLayout(textButton, "Contains Phrase"))
@@ -175,6 +174,8 @@ namespace TopicFilterer.View
             this.scoreBox = new Editor();
             this.scoreBox.TextColor = Color.White;
             this.scoreBox.BackgroundColor = Color.Black;
+            this.scoreBox.Keyboard = Keyboard.Numeric;
+
             TextboxLayout scoreBoxLayout = new TextboxLayout(this.scoreBox);
             scoreBoxLayout.SetBackgroundColor(Color.White);
             LayoutChoice_Set scoreLayout = new Horizontal_GridLayout_Builder().Uniform()
